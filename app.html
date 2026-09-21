@@ -141,6 +141,44 @@
   .aba.on::before{content:"";position:absolute;top:0;width:26px;height:3px;border-radius:0 0 4px 4px;background:var(--brand)}
   .ponto{position:absolute;top:6px;right:calc(50% - 18px);width:9px;height:9px;border-radius:50%;background:var(--neg)}
 
+  /* Boas-vindas e popups */
+  .capa{position:relative;overflow:hidden;background:var(--grad);color:#fff;padding:36px 22px 74px;text-align:center}
+  .capa::after{content:"";position:absolute;left:-60px;bottom:-120px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.18),transparent 65%)}
+  .capa-marca{width:64px;height:64px;border-radius:20px;background:rgba(255,255,255,.18);display:grid;place-items:center;margin:0 auto 16px}
+  .capa h1{font-size:26px;font-weight:800}
+  .capa p{margin:10px 0 0;opacity:.94;font-size:15px}
+  .selo-posto{display:inline-flex;align-items:center;gap:8px;margin-top:16px;background:rgba(255,255,255,.2);
+    padding:9px 16px;border-radius:999px;font-size:13.5px;font-weight:650;position:relative;z-index:1}
+  .capa-conteudo{max-width:480px;margin:-54px auto 0;padding:0 18px calc(40px + env(safe-area-inset-bottom));position:relative;z-index:2}
+  .vantagens{display:grid;gap:14px;margin-top:18px}
+  .vant{display:flex;gap:13px;align-items:flex-start}
+  .vic{width:44px;height:44px;border-radius:14px;background:var(--brand-50);display:grid;place-items:center;font-size:20px;flex:none}
+  .vant b{display:block;font-size:15px}
+  .vant span{font-size:13.5px;color:var(--ink-3)}
+
+  dialog{border:0;padding:0;color:var(--ink);background:var(--surface);width:min(470px,calc(100% - 26px));
+    border-radius:var(--r-xl);box-shadow:0 24px 60px rgba(0,0,0,.35);max-height:92dvh;overflow:hidden}
+  dialog::backdrop{background:rgba(6,16,26,.6);backdrop-filter:blur(3px)}
+  dialog[open]{animation:sobe .3s var(--ease) both;display:flex;flex-direction:column}
+  @media(max-width:600px){
+    dialog{width:100%;max-width:none;margin:auto auto 0;border-radius:var(--r-xl) var(--r-xl) 0 0;max-height:94dvh}
+  }
+  .pop-topo{display:flex;align-items:center;justify-content:space-between;padding:20px 22px 12px;flex:none}
+  .pop-topo h2{font-size:20px}
+  .fechar{width:38px;height:38px;border-radius:50%;border:0;background:var(--surface-2);color:var(--ink-2);font-size:15px;cursor:pointer}
+  .pop-corpo{padding:0 22px;overflow-y:auto;flex:1}
+  .pop-rodape{padding:16px 22px calc(20px + env(safe-area-inset-bottom));flex:none;border-top:1px solid var(--line);background:var(--surface)}
+  .selo-ok{width:84px;height:84px;border-radius:50%;background:var(--pos-bg);display:grid;place-items:center;font-size:38px;margin:0 auto 16px}
+
+  .campo-2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+  .dica{font-size:12.5px;color:var(--ink-3);margin:6px 0 0}
+  .dica.ok{color:var(--pos-ink)}
+  .dica.erro{color:var(--neg-ink)}
+  .dados-conta{display:grid;gap:12px;margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
+  .dados-conta div{display:flex;justify-content:space-between;gap:14px;align-items:baseline}
+  .dados-conta span{font-size:12.5px;color:var(--ink-3);font-weight:600}
+  .dados-conta b{font-size:14px;text-align:right;word-break:break-word}
+
   .carregando{position:fixed;inset:0;display:grid;place-items:center;background:var(--bg);z-index:90}
   .spin{width:36px;height:36px;border-radius:50%;border:3px solid var(--brand-50);border-top-color:var(--brand);animation:gira .8s linear infinite}
   .rodape{text-align:center;color:var(--ink-3);font-size:12.5px;margin-top:22px}
@@ -151,44 +189,114 @@
 
 <div class="carregando" id="carregando"><div class="spin"></div></div>
 
-<!-- ============ ENTRAR / CADASTRAR ============ -->
-<section class="tela" id="tela-login" hidden>
-  <div class="topo">
-    <span class="marca"><svg viewBox="0 0 24 24" width="21" height="21" fill="#fff"><path d="M12 2.7c-.3 0-.6.2-.8.4C9.6 5.3 5 11.4 5 15a7 7 0 0 0 14 0c0-3.6-4.6-9.7-6.2-11.9-.2-.2-.5-.4-.8-.4z"/></svg></span>
-    <span class="titulo">Vision Água</span>
-  </div>
+<!-- ============ BOAS-VINDAS (um link só: entrar ou criar conta) ============ -->
+<section id="tela-login" hidden>
+  <header class="capa">
+    <div class="capa-marca"><svg viewBox="0 0 24 24" width="30" height="30" fill="#fff"><path d="M12 2.7c-.3 0-.6.2-.8.4C9.6 5.3 5 11.4 5 15a7 7 0 0 0 14 0c0-3.6-4.6-9.7-6.2-11.9-.2-.2-.5-.4-.8-.4z"/></svg></div>
+    <h1>Vision Água</h1>
+    <p>Sua conta de água, no celular</p>
+    <span class="selo-posto">📍 <span id="posto-nome">Vision Água</span></span>
+  </header>
 
-  <div class="card">
-    <h2 id="login-titulo">Entrar na minha conta</h2>
-    <p class="hint" id="login-sub">Use seus créditos para retirar água.</p>
-
-    <div id="campos-cadastro" hidden>
-      <div class="campo"><label for="nome">Nome completo</label><input id="nome" class="input" autocomplete="name" placeholder="Seu nome completo"></div>
-      <div class="campo"><label for="telefone">Telefone com DDD</label><input id="telefone" class="input" inputmode="tel" autocomplete="tel" placeholder="(00) 00000-0000"></div>
-      <div class="campo"><label for="endereco">Endereço</label><textarea id="endereco" class="input" autocomplete="street-address" placeholder="Rua, número, bairro, cidade"></textarea></div>
-      <div class="campo"><label>Foto (opcional)</label>
-        <div class="foto-wrap">
-          <img id="foto-preview" class="foto" alt="" hidden>
-          <div id="foto-vazia" class="foto">📷</div>
-          <div style="flex:1">
-            <button class="btn btn-ghost btn-sm" type="button" id="btn-foto">Escolher foto</button>
-            <p class="hint">Fica guardada só na sua conta.</p>
-          </div>
-        </div>
-        <input type="file" id="foto-input" accept="image/*" hidden>
+  <div class="capa-conteudo">
+    <div class="card">
+      <h2>Bem-vindo</h2>
+      <p class="hint">Recarregue uma vez e retire água quantas vezes quiser, sem ficar fazendo PIX toda hora.</p>
+      <div class="vantagens">
+        <div class="vant"><span class="vic">⚡</span><div><b>Retirada na hora</b><span>Aproxime o cartão ou use o celular</span></div></div>
+        <div class="vant"><span class="vic">🎁</span><div><b>Cashback</b><span>Parte do valor volta como crédito</span></div></div>
+        <div class="vant"><span class="vic">🪪</span><div><b>Cartão Vision</b><span>Solicite pelo aplicativo, sem custo</span></div></div>
       </div>
+      <button class="btn btn-primary" id="abrir-cadastro" style="margin-top:22px">Criar minha conta</button>
+      <button class="btn btn-ghost" id="abrir-login" style="margin-top:11px">Já tenho conta. Entrar</button>
     </div>
-
-    <div class="campo"><label for="email">E-mail</label><input id="email" class="input" type="email" autocomplete="email" inputmode="email" placeholder="voce@email.com"></div>
-    <div class="campo"><label for="senha">Senha</label><input id="senha" class="input" type="password" autocomplete="current-password" placeholder="mínimo de 6 caracteres"></div>
-
-    <p class="erro" id="login-erro" hidden></p>
-    <button class="btn btn-primary" id="btn-entrar" style="margin-top:18px">Entrar</button>
-    <button class="link" id="btn-alternar">Não tenho conta. Quero me cadastrar</button>
-    <button class="link" id="btn-esqueci" style="color:var(--ink-3);font-weight:600">Esqueci minha senha</button>
+    <p class="rodape">Seus créditos ficam guardados na sua conta e só você usa.</p>
   </div>
-  <p class="rodape">Seus créditos ficam guardados na sua conta e só você usa.</p>
 </section>
+
+<!-- POPUP: CRIAR CONTA -->
+<dialog id="pop-cadastro">
+  <div class="pop-topo"><h2>Criar conta</h2><button class="fechar" data-fechar>✕</button></div>
+  <div class="pop-corpo">
+    <p class="hint" id="cad-posto" style="margin-top:0"></p>
+    <div class="campo"><label for="nome">Nome completo</label><input id="nome" class="input" autocomplete="name" placeholder="Seu nome completo"></div>
+    <div class="campo"><label for="telefone">Telefone com DDD</label><input id="telefone" class="input" inputmode="tel" autocomplete="tel" placeholder="(00) 00000-0000"></div>
+    <div class="end-grupo" data-end="c">
+      <div class="campo-2">
+        <div class="campo"><label for="c-cep">CEP</label><input id="c-cep" class="input" inputmode="numeric" maxlength="9" placeholder="00000-000" autocomplete="postal-code"></div>
+        <div class="campo"><label for="c-uf">Estado</label><input id="c-uf" class="input" maxlength="2" placeholder="SP" autocomplete="address-level1"></div>
+      </div>
+      <div class="campo"><label for="c-cidade">Cidade</label><input id="c-cidade" class="input" placeholder="Sua cidade" autocomplete="address-level2"></div>
+      <div class="campo"><label for="c-rua">Rua / Avenida</label>
+        <input id="c-rua" class="input" list="lista-c" placeholder="Comece a digitar o nome da rua" autocomplete="off">
+        <datalist id="lista-c"></datalist>
+        <p class="dica" id="c-dica">Digite o CEP para preencher sozinho, ou escreva a rua e escolha uma sugestão.</p>
+      </div>
+      <div class="campo-2">
+        <div class="campo"><label for="c-numero">Número</label><input id="c-numero" class="input" inputmode="numeric" placeholder="123"></div>
+        <div class="campo"><label for="c-compl">Complemento</label><input id="c-compl" class="input" placeholder="apto, bloco"></div>
+      </div>
+      <div class="campo"><label for="c-bairro">Bairro</label><input id="c-bairro" class="input" placeholder="Seu bairro"></div>
+    </div>
+    <div class="campo"><label for="email">E-mail</label><input id="email" class="input" type="email" inputmode="email" autocomplete="email" placeholder="voce@email.com"></div>
+    <div class="campo"><label for="senha">Criar uma senha</label><input id="senha" class="input" type="password" autocomplete="new-password" placeholder="mínimo de 6 caracteres"></div>
+    <div class="campo"><label>Foto (opcional)</label>
+      <div class="foto-wrap">
+        <img id="foto-preview" class="foto" alt="" hidden>
+        <div id="foto-vazia" class="foto">📷</div>
+        <div style="flex:1"><button class="btn btn-ghost btn-sm" type="button" id="btn-foto">Escolher foto</button></div>
+      </div>
+      <input type="file" id="foto-input" accept="image/*" hidden>
+    </div>
+    <p class="erro" id="login-erro" hidden></p>
+  </div>
+  <div class="pop-rodape">
+    <button class="btn btn-primary" id="btn-entrar">Criar conta</button>
+    <button class="link" id="trocar-login">Já tenho conta. Entrar</button>
+  </div>
+</dialog>
+
+<!-- POPUP: ENTRAR -->
+<dialog id="pop-login">
+  <div class="pop-topo"><h2>Entrar</h2><button class="fechar" data-fechar>✕</button></div>
+  <div class="pop-corpo">
+    <div class="campo"><label for="l-email">E-mail</label><input id="l-email" class="input" type="email" inputmode="email" autocomplete="email"></div>
+    <div class="campo"><label for="l-senha">Senha</label><input id="l-senha" class="input" type="password" autocomplete="current-password"></div>
+    <p class="erro" id="log-erro" hidden></p>
+  </div>
+  <div class="pop-rodape">
+    <button class="btn btn-primary" id="btn-login">Entrar</button>
+    <button class="link" id="btn-esqueci">Esqueci minha senha</button>
+    <button class="link" id="trocar-cadastro" style="color:var(--ink-3)">Ainda não tenho conta</button>
+  </div>
+</dialog>
+
+<!-- POPUP: CONTA DE ADMINISTRAÇÃO -->
+<dialog id="pop-admin">
+  <div class="pop-corpo" style="text-align:center;padding-top:26px">
+    <div class="selo-ok" style="background:var(--warn-bg)">🛠️</div>
+    <h2>Conta de administração</h2>
+    <p class="hint">Você está conectado como <b id="admin-email"></b>, que é a conta do painel, não de cliente.
+      Para usar como cliente, saia e entre com uma conta de cliente, ou abra este link numa janela anônima.</p>
+  </div>
+  <div class="pop-rodape">
+    <button class="btn btn-primary" id="admin-sair">Sair desta conta</button>
+    <button class="link" id="admin-painel">Ir para o painel de administração</button>
+  </div>
+</dialog>
+
+<!-- POPUP: CONTA CRIADA -->
+<dialog id="pop-sucesso">
+  <div class="pop-corpo" style="text-align:center;padding-top:26px">
+    <div class="selo-ok">✉️</div>
+    <h2>Conta criada!</h2>
+    <p class="hint">Enviamos um e-mail de confirmação para <b id="email-enviado"></b>. Se não achar, veja o spam.</p>
+  </div>
+  <div class="pop-rodape">
+    <button class="btn btn-primary" id="btn-ir-conta">Ir para minha conta</button>
+    <button class="link" id="btn-reenviar-1">Reenviar e-mail</button>
+  </div>
+</dialog>
 
 <!-- ============ APLICATIVO ============ -->
 <div id="app" hidden>
@@ -334,8 +442,34 @@
         <input type="file" id="foto-input2" accept="image/*" hidden>
         <div class="campo"><label for="p-nome">Nome completo</label><input id="p-nome" class="input"></div>
         <div class="campo"><label for="p-tel">Telefone</label><input id="p-tel" class="input" inputmode="tel"></div>
-        <div class="campo"><label for="p-end">Endereço</label><textarea id="p-end" class="input"></textarea></div>
-        <p class="hint">E-mail: <b id="p-email"></b></p>
+
+        <div class="end-grupo" data-end="p">
+          <div class="campo-2">
+            <div class="campo"><label for="p-cep">CEP</label><input id="p-cep" class="input" inputmode="numeric" maxlength="9" placeholder="00000-000"></div>
+            <div class="campo"><label for="p-uf">Estado</label><input id="p-uf" class="input" maxlength="2" placeholder="SP"></div>
+          </div>
+          <div class="campo"><label for="p-cidade">Cidade</label><input id="p-cidade" class="input"></div>
+          <div class="campo"><label for="p-rua">Rua / Avenida</label>
+            <input id="p-rua" class="input" list="lista-p" autocomplete="off">
+            <datalist id="lista-p"></datalist>
+            <p class="dica" id="p-dica">Digite o CEP para preencher sozinho, ou escreva a rua e escolha uma sugestão.</p>
+          </div>
+          <div class="campo-2">
+            <div class="campo"><label for="p-numero">Número</label><input id="p-numero" class="input" inputmode="numeric"></div>
+            <div class="campo"><label for="p-compl">Complemento</label><input id="p-compl" class="input"></div>
+          </div>
+          <div class="campo"><label for="p-bairro">Bairro</label><input id="p-bairro" class="input"></div>
+        </div>
+
+        <div class="dados-conta">
+          <div><span>E-mail</span><b id="p-email"></b></div>
+          <div><span>Situação do e-mail</span><b id="p-verificado"></b></div>
+          <div><span>Posto de origem</span><b id="p-posto"></b></div>
+          <div><span>Cliente desde</span><b id="p-desde"></b></div>
+          <div><span>Meu cartão</span><b id="p-cartao"></b></div>
+          <div><span>Saldo e cashback</span><b id="p-valores"></b></div>
+        </div>
+        <button class="link" id="p-reenviar" hidden>Reenviar e-mail de confirmação</button>
         <p class="ok" id="perfil-ok" hidden></p>
         <p class="erro" id="perfil-erro" hidden></p>
         <button class="btn btn-primary" id="btn-salvar-perfil" style="margin-top:16px">Salvar alterações</button>
@@ -379,7 +513,10 @@ const fmt = ts => ts ? new Date(Number(ts) * 1000).toLocaleString('pt-BR', { tim
 function lsGet(k, d){ try { return localStorage.getItem(k) ?? d; } catch { return d; } }
 function lsSet(k, v){ try { localStorage.setItem(k, v); } catch {} }
 
-const maquina = new URLSearchParams(location.search).get('m') || '';
+// Um link só: aceita ?m=posto (na máquina) e ?p=posto (no balcão)
+const params = new URLSearchParams(location.search);
+const maquina = (params.get('m') || params.get('p') || '').trim();
+let nomePosto = maquina || 'Vision Água';
 
 let cadastrando = false, usuario = null, cliente = {}, saldo = 0, cashback = 0;
 let valorEscolhido = 0, recargaId = null, pedidoId = null, fotoNova = '';
@@ -390,6 +527,111 @@ function mostrarErro(el, msg) { el.textContent = msg; el.hidden = false; }
 function limpar(el) { el.hidden = true; }
 function passo(el, estado) { el.className = 'passo' + (estado ? ' ' + estado : ''); }
 function ouvir(ref, cb) { const h = ref.on('value', s => cb(s.val()), () => {}); offs.push(() => ref.off('value', h)); }
+
+// ================= ENDEREÇO (Correios / ViaCEP, gratuito) =================
+const soDigitos = s => String(s || '').replace(/\D/g, '');
+
+function montarEndereco(pre) {
+  const v = id => ($('#' + pre + '-' + id)?.value || '').trim();
+  const rua = v('rua'), num = v('numero'), compl = v('compl'), bairro = v('bairro'), cidade = v('cidade'), uf = v('uf'), cep = v('cep');
+  const linha1 = [rua, num].filter(Boolean).join(', ') + (compl ? ' - ' + compl : '');
+  const linha2 = [bairro, cidade && uf ? `${cidade}/${uf.toUpperCase()}` : cidade || uf].filter(Boolean).join(', ');
+  return {
+    cep: soDigitos(cep), rua, numero: num, complemento: compl, bairro, cidade, uf: uf.toUpperCase(),
+    texto: [linha1, linha2, cep ? 'CEP ' + cep : ''].filter(Boolean).join(' · ')
+  };
+}
+
+function preencherEndereco(pre, e) {
+  if (!e) return;
+  const set = (id, val) => { const el = $('#' + pre + '-' + id); if (el && !el.dataset.editando) el.value = val || ''; };
+  set('cep', e.cep ? String(e.cep).replace(/^(\d{5})(\d{3})$/, '$1-$2') : '');
+  set('rua', e.rua); set('numero', e.numero); set('compl', e.complemento);
+  set('bairro', e.bairro); set('cidade', e.cidade); set('uf', e.uf);
+}
+
+const enderecoDoCliente = c => {
+  if (!c) return null;
+  if (c.endereco && typeof c.endereco === 'object') return c.endereco;
+  if (typeof c.endereco === 'string' && c.endereco) return { texto: c.endereco, rua: c.endereco };
+  return null;
+};
+const textoEndereco = c => { const e = enderecoDoCliente(c); return e ? (e.texto || e.rua || '') : ''; };
+
+async function buscarCep(pre) {
+  const cep = soDigitos($('#' + pre + '-cep').value);
+  const dica = $('#' + pre + '-dica');
+  if (cep.length !== 8) return;
+  dica.className = 'dica'; dica.textContent = 'Procurando o CEP…';
+  try {
+    const r = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+    const d = await r.json();
+    if (d.erro) { dica.className = 'dica erro'; dica.textContent = 'CEP não encontrado. Confira o número.'; return; }
+    const set = (id, v) => { const el = $('#' + pre + '-' + id); if (el && v) el.value = v; };
+    set('rua', d.logradouro); set('bairro', d.bairro); set('cidade', d.localidade); set('uf', d.uf);
+    dica.className = 'dica ok';
+    dica.textContent = `${d.logradouro ? d.logradouro + ', ' : ''}${d.bairro ? d.bairro + ' - ' : ''}${d.localidade}/${d.uf}. Falta o número.`;
+    $('#' + pre + '-numero')?.focus();
+  } catch (e) { dica.className = 'dica erro'; dica.textContent = 'Não consegui consultar o CEP agora.'; }
+}
+
+let buscaRua = {};
+async function sugerirRuas(pre) {
+  clearTimeout(buscaRua[pre]);
+  buscaRua[pre] = setTimeout(async () => {
+    // "Av Ana" vira "Ana": os Correios guardam o nome por extenso
+    const rua = ($('#' + pre + '-rua').value || '').trim()
+      .replace(/^(rua|r\.?|avenida|av\.?|travessa|tv\.?|alameda|al\.?|pra[çc]a|pç\.?|estrada|estr\.?|rodovia|rod\.?)\s+/i, '');
+    const cidade = ($('#' + pre + '-cidade').value || '').trim();
+    const uf = ($('#' + pre + '-uf').value || '').trim();
+    const lista = $('#lista-' + pre);
+    const dica = $('#' + pre + '-dica');
+    if (rua.length < 3) { lista.innerHTML = ''; return; }
+    if (cidade.length < 3 || uf.length !== 2) {
+      dica.className = 'dica';
+      dica.textContent = 'Preencha cidade e estado (ou o CEP) para eu sugerir as ruas.';
+      return;
+    }
+    try {
+      const url = `https://viacep.com.br/ws/${encodeURIComponent(uf)}/${encodeURIComponent(cidade)}/${encodeURIComponent(rua)}/json/`;
+      const r = await fetch(url);
+      const d = await r.json();
+      if (!Array.isArray(d) || !d.length) { lista.innerHTML = ''; return; }
+      lista.innerHTML = d.slice(0, 12).map(x =>
+        `<option value="${esc(x.logradouro)}">${esc(x.bairro)} · CEP ${esc(x.cep)}</option>`).join('');
+      dica.className = 'dica ok';
+      dica.textContent = `${d.length} endereço(s) encontrado(s). Escolha na lista que apareceu.`;
+      lista.dataset.dados = JSON.stringify(d.slice(0, 12));
+    } catch (e) { lista.innerHTML = ''; }
+  }, 450);
+}
+
+function aoEscolherRua(pre) {
+  const lista = $('#lista-' + pre);
+  let dados = [];
+  try { dados = JSON.parse(lista.dataset.dados || '[]'); } catch (e) {}
+  const escolhido = dados.find(x => x.logradouro === $('#' + pre + '-rua').value);
+  if (!escolhido) return;
+  if (!$('#' + pre + '-bairro').value) $('#' + pre + '-bairro').value = escolhido.bairro || '';
+  const cep = $('#' + pre + '-cep');
+  if (!soDigitos(cep.value) && escolhido.cep) cep.value = escolhido.cep;
+  const dica = $('#' + pre + '-dica');
+  dica.className = 'dica ok';
+  dica.textContent = 'Endereço confirmado. Agora informe o número.';
+}
+
+['c', 'p'].forEach(pre => {
+  const cep = $('#' + pre + '-cep'), rua = $('#' + pre + '-rua');
+  if (!cep || !rua) return;
+  cep.addEventListener('input', e => {
+    const d = soDigitos(e.target.value).slice(0, 8);
+    e.target.value = d.length > 5 ? d.replace(/^(\d{5})(\d+)/, '$1-$2') : d;
+    if (d.length === 8) buscarCep(pre);
+  });
+  rua.addEventListener('input', () => { sugerirRuas(pre); aoEscolherRua(pre); });
+  rua.addEventListener('change', () => aoEscolherRua(pre));
+  $('#' + pre + '-uf').addEventListener('input', e => { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 2); });
+});
 
 // ================= FOTO =================
 function lerFoto(input, aoTerminar) {
@@ -423,14 +665,29 @@ $('#foto-input2').addEventListener('change', e => lerFoto(e.target, d => {
 }));
 
 // ================= LOGIN E CADASTRO =================
-$('#btn-alternar').addEventListener('click', () => {
-  cadastrando = !cadastrando;
-  $('#campos-cadastro').hidden = !cadastrando;
-  $('#login-titulo').textContent = cadastrando ? 'Criar minha conta' : 'Entrar na minha conta';
-  $('#login-sub').textContent = cadastrando ? 'Leva menos de um minuto.' : 'Use seus créditos para retirar água.';
-  $('#btn-entrar').textContent = cadastrando ? 'Criar conta' : 'Entrar';
-  $('#btn-alternar').textContent = cadastrando ? 'Já tenho conta. Quero entrar' : 'Não tenho conta. Quero me cadastrar';
-  limpar($('#login-erro'));
+async function carregarPosto() {
+  if (!maquina) return;
+  try {
+    const s = await db.ref('/indice/' + maquina + '/nome').get();
+    if (s.exists()) nomePosto = s.val();
+  } catch (e) {}
+  $('#posto-nome').textContent = nomePosto;
+  $('#cad-posto').textContent = `Seus créditos vão valer no ${nomePosto}.`;
+}
+
+function abrir(id) { limpar($('#login-erro')); limpar($('#log-erro')); $(id).showModal(); }
+function fechar(id) { const d = $(id); if (d.open) d.close(); }
+$('#abrir-cadastro').addEventListener('click', () => { cadastrando = true; abrir('#pop-cadastro'); });
+$('#abrir-login').addEventListener('click', () => { cadastrando = false; abrir('#pop-login'); });
+$('#trocar-login').addEventListener('click', () => { fechar('#pop-cadastro'); cadastrando = false; abrir('#pop-login'); });
+$('#trocar-cadastro').addEventListener('click', () => { fechar('#pop-login'); cadastrando = true; abrir('#pop-cadastro'); });
+$$('[data-fechar]').forEach(b => b.addEventListener('click', () => { fechar('#pop-cadastro'); fechar('#pop-login'); }));
+$('#btn-ir-conta').addEventListener('click', () => fechar('#pop-sucesso'));
+$('#admin-sair').addEventListener('click', () => { fechar('#pop-admin'); auth.signOut(); });
+$('#admin-painel').addEventListener('click', () => { location.href = 'index.html'; });
+$('#btn-reenviar-1').addEventListener('click', async () => {
+  try { await auth.currentUser.sendEmailVerification(); alert('E-mail reenviado. Confira a caixa de entrada e o spam.'); }
+  catch (e) { alert('Não foi possível reenviar agora.'); }
 });
 
 function msgAuth(e) {
@@ -446,44 +703,61 @@ function msgAuth(e) {
   }
 }
 
+// Criar conta (popup)
 $('#btn-entrar').addEventListener('click', async () => {
   const email = $('#email').value.trim(), senha = $('#senha').value;
-  const nome = $('#nome').value.trim(), telefone = $('#telefone').value.trim(), endereco = $('#endereco').value.trim();
+  const nome = $('#nome').value.trim(), telefone = $('#telefone').value.trim();
+  const endereco = montarEndereco('c');
   const btn = $('#btn-entrar');
   limpar($('#login-erro'));
-  if (!email || !senha) return mostrarErro($('#login-erro'), 'Preencha e-mail e senha.');
-  if (cadastrando) {
-    if (nome.split(' ').filter(Boolean).length < 2) return mostrarErro($('#login-erro'), 'Escreva seu nome completo.');
-    if (telefone.replace(/\D/g, '').length < 10) return mostrarErro($('#login-erro'), 'Informe um telefone com DDD.');
-    if (endereco.length < 8) return mostrarErro($('#login-erro'), 'Informe seu endereço.');
-  }
-  btn.disabled = true; btn.textContent = cadastrando ? 'Criando…' : 'Entrando…';
+  if (nome.split(' ').filter(Boolean).length < 2) return mostrarErro($('#login-erro'), 'Escreva seu nome completo.');
+  if (telefone.replace(/\D/g, '').length < 10) return mostrarErro($('#login-erro'), 'Informe um telefone com DDD.');
+  if (!endereco.rua || !endereco.cidade) return mostrarErro($('#login-erro'), 'Informe a rua e a cidade. O CEP preenche tudo sozinho.');
+  if (!endereco.numero) return mostrarErro($('#login-erro'), 'Informe o número da casa.');
+  if (!email) return mostrarErro($('#login-erro'), 'Informe seu e-mail.');
+  if (senha.length < 6) return mostrarErro($('#login-erro'), 'A senha precisa ter pelo menos 6 caracteres.');
+
+  btn.disabled = true; btn.textContent = 'Criando…';
   try {
-    if (cadastrando) {
-      const cred = await auth.createUserWithEmailAndPassword(email, senha);
-      await db.ref('/clientes/' + cred.user.uid).set({
-        nome, email, telefone, endereco, foto: fotoNova || '', saldo: 0, criado_em: agoraSec()
-      });
-      try { await cred.user.sendEmailVerification(); } catch (e) {}
-    } else {
-      await auth.signInWithEmailAndPassword(email, senha);
-    }
+    const cred = await auth.createUserWithEmailAndPassword(email, senha);
+    await db.ref('/clientes/' + cred.user.uid).set({
+      nome, email, telefone, endereco, foto: fotoNova || '',
+      posto: maquina || '', posto_nome: nomePosto,
+      saldo: 0, criado_em: agoraSec()
+    });
+    try { await cred.user.sendEmailVerification(); } catch (e) {}
     $('#senha').value = '';
+    fechar('#pop-cadastro');
+    $('#email-enviado').textContent = email;
+    $('#pop-sucesso').showModal();
   } catch (e) {
     mostrarErro($('#login-erro'), msgAuth(e));
-  } finally {
-    btn.disabled = false; btn.textContent = cadastrando ? 'Criar conta' : 'Entrar';
-  }
+  } finally { btn.disabled = false; btn.textContent = 'Criar conta'; }
+});
+
+// Entrar (popup)
+$('#btn-login').addEventListener('click', async () => {
+  const email = $('#l-email').value.trim(), senha = $('#l-senha').value;
+  const btn = $('#btn-login');
+  limpar($('#log-erro'));
+  if (!email || !senha) return mostrarErro($('#log-erro'), 'Preencha e-mail e senha.');
+  btn.disabled = true; btn.textContent = 'Entrando…';
+  try {
+    await auth.signInWithEmailAndPassword(email, senha);
+    $('#l-senha').value = '';
+    fechar('#pop-login');
+  } catch (e) { mostrarErro($('#log-erro'), msgAuth(e)); }
+  finally { btn.disabled = false; btn.textContent = 'Entrar'; }
 });
 
 $('#btn-esqueci').addEventListener('click', async () => {
-  const email = $('#email').value.trim();
-  if (!email) return mostrarErro($('#login-erro'), 'Escreva seu e-mail primeiro.');
+  const email = $('#l-email').value.trim();
+  if (!email) return mostrarErro($('#log-erro'), 'Escreva seu e-mail primeiro.');
   try {
     await auth.sendPasswordResetEmail(email);
-    $('#login-erro').className = 'ok';
-    mostrarErro($('#login-erro'), 'Enviamos um link de troca de senha para o seu e-mail.');
-  } catch (e) { $('#login-erro').className = 'erro'; mostrarErro($('#login-erro'), msgAuth(e)); }
+    $('#log-erro').className = 'ok';
+    mostrarErro($('#log-erro'), 'Enviamos um link de troca de senha para o seu e-mail.');
+  } catch (e) { $('#log-erro').className = 'erro'; mostrarErro($('#log-erro'), msgAuth(e)); }
 });
 
 $('#btn-sair').addEventListener('click', () => auth.signOut());
@@ -520,9 +794,20 @@ function iniciar(user) {
       $('#perfil-foto').src = cliente.foto; $('#perfil-foto').hidden = false; $('#perfil-foto-vazia').hidden = true;
     } else $('#topo-inicial').textContent = (primeiro[0] || '•').toUpperCase();
     if (!$('#p-nome').dataset.editando) {
-      $('#p-nome').value = cliente.nome || ''; $('#p-tel').value = cliente.telefone || ''; $('#p-end').value = cliente.endereco || '';
+      $('#p-nome').value = cliente.nome || '';
+      $('#p-tel').value = cliente.telefone || '';
     }
+    preencherEndereco('p', enderecoDoCliente(cliente));
+
     $('#p-email').textContent = cliente.email || user.email || '';
+    $('#p-verificado').textContent = user.emailVerified ? 'Confirmado ✅' : 'Aguardando confirmação';
+    $('#p-reenviar').hidden = user.emailVerified;
+    $('#p-posto').textContent = cliente.posto_nome || cliente.posto || 'não informado';
+    $('#p-desde').textContent = cliente.criado_em ? fmt(cliente.criado_em) : '—';
+    $('#p-valores').textContent = `${brl(saldo)} · 🎁 ${brl(cashback)}`;
+    $('#p-cartao').textContent = meuCartao
+      ? `${meuCartao.tag} (${meuCartao.ativo === false ? 'bloqueado' : 'ativo'})`
+      : (meuPedidoCartao ? 'pedido em andamento' : 'sem cartão');
     atualizarSaldoSub(); atualizarBotaoAgua(); renderCashback(); renderCartao();
   });
 
@@ -650,14 +935,14 @@ function renderCartao() {
 $('#btn-pedir-cartao').addEventListener('click', async () => {
   const btn = $('#btn-pedir-cartao');
   limpar($('#cartao-erro'));
-  if (!cliente.telefone || !cliente.endereco) {
+  if (!cliente.telefone || !textoEndereco(cliente)) {
     return mostrarErro($('#cartao-erro'), 'Complete seu telefone e endereço na aba Perfil antes de pedir o cartão.');
   }
   btn.disabled = true; btn.textContent = 'Enviando…';
   try {
     await db.ref('/pedidos_cartao/' + usuario.uid).set({
       uid: usuario.uid, nome: cliente.nome || '', email: cliente.email || usuario.email,
-      telefone: cliente.telefone || '', endereco: cliente.endereco || '',
+      telefone: cliente.telefone || '', endereco: textoEndereco(cliente),
       status: 'solicitado', solicitado_em: agoraSec()
     });
   } catch (e) {
@@ -684,11 +969,18 @@ function renderPromocoes() {
 }
 
 // ================= PERFIL =================
-['#p-nome', '#p-tel', '#p-end'].forEach(s => $(s).addEventListener('input', e => { e.target.dataset.editando = '1'; }));
+const CAMPOS_PERFIL = ['#p-nome', '#p-tel', '#p-cep', '#p-rua', '#p-numero', '#p-compl', '#p-bairro', '#p-cidade', '#p-uf'];
+CAMPOS_PERFIL.forEach(s => $(s).addEventListener('input', e => { e.target.dataset.editando = '1'; }));
+$('#p-reenviar').addEventListener('click', async () => {
+  try { await usuario.sendEmailVerification(); alert('E-mail reenviado. Confira a caixa de entrada e o spam.'); }
+  catch (e) { alert('Não foi possível reenviar agora.'); }
+});
 $('#btn-salvar-perfil').addEventListener('click', async () => {
   limpar($('#perfil-ok')); limpar($('#perfil-erro'));
-  const nome = $('#p-nome').value.trim(), tel = $('#p-tel').value.trim(), end = $('#p-end').value.trim();
+  const nome = $('#p-nome').value.trim(), tel = $('#p-tel').value.trim();
+  const end = montarEndereco('p');
   if (nome.split(' ').filter(Boolean).length < 2) return mostrarErro($('#perfil-erro'), 'Escreva seu nome completo.');
+  if (!end.rua || !end.cidade) return mostrarErro($('#perfil-erro'), 'Informe pelo menos a rua e a cidade.');
   const btn = $('#btn-salvar-perfil');
   btn.disabled = true; btn.textContent = 'Salvando…';
   try {
@@ -696,7 +988,7 @@ $('#btn-salvar-perfil').addEventListener('click', async () => {
     if (fotoNova) dados.foto = fotoNova;
     await db.ref('/clientes/' + usuario.uid).update(dados);
     fotoNova = '';
-    ['#p-nome', '#p-tel', '#p-end'].forEach(s => delete $(s).dataset.editando);
+    CAMPOS_PERFIL.forEach(s => delete $(s).dataset.editando);
     $('#perfil-ok').hidden = false; $('#perfil-ok').textContent = 'Dados atualizados ✅';
   } catch (e) {
     mostrarErro($('#perfil-erro'), 'Não foi possível salvar. Tente de novo.');
@@ -816,9 +1108,24 @@ $('#btn-cancelar-rec').addEventListener('click', () => {
 });
 
 // ================= SESSÃO =================
+// Contas de administração não usam o aplicativo do cliente
+const EMAILS_ADMIN = ['center@vision.com.br', 'esp@vision.com.br'];
+
+carregarPosto();
 auth.onAuthStateChanged(user => {
   $('#carregando').hidden = true;
+
+  if (user && EMAILS_ADMIN.includes((user.email || '').toLowerCase())) {
+    $('#app').hidden = true;
+    $('#tela-login').hidden = false;
+    const d = $('#pop-admin');
+    $('#admin-email').textContent = user.email;
+    if (!d.open) d.showModal();
+    return;
+  }
+
   if (user) {
+    fechar('#pop-login'); fechar('#pop-cadastro'); fechar('#pop-admin');
     $('#tela-login').hidden = true;
     $('#app').hidden = false;
     iniciar(user);

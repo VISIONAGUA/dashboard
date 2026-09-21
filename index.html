@@ -4535,6 +4535,10 @@ function renderClientes() {
       </div>
       <div class="row-end"><span class="row-val ${Number(c.saldo) > 0 ? 'pos' : ''}">${mascara(c.saldo)}</span></div>
       <div class="det">
+        ${linhaDet('Telefone', c.telefone)}
+        ${linhaDet('Endereço', c.endereco && typeof c.endereco === 'object' ? (c.endereco.texto || '') : (c.endereco || ''))}
+        ${linhaDet('Posto de origem', c.posto_nome || c.posto)}
+        ${linhaDet('Cashback acumulado', Number(c.cashback) > 0 ? brl(c.cashback) : '')}
         ${linhaDet('Cliente desde', fmtCurta(c.criado_em))}
         ${linhaDet('Identificador', c.id)}
         <div style="grid-column:1/-1">
