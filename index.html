@@ -159,6 +159,9 @@
     -webkit-backdrop-filter:saturate(180%) blur(14px);border-bottom:1px solid var(--line)}
   .topbar h1{font-size:17.5px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700}
   .topo-marca{width:34px;height:34px;border-radius:11px;background:var(--grad-brand);display:grid;place-items:center;flex:none;margin-left:6px}
+  .sel-maq{height:38px;width:auto;max-width:min(42vw,190px);font-size:13px;font-weight:650;padding:0 34px 0 14px;border-radius:999px;
+    background-color:var(--surface-2);border-color:transparent;flex:none}
+  @media(max-width:400px){ .tab{font-size:9.5px} .tab .ti{font-size:18px} .tab-badge{right:calc(50% - 17px)} }
   @media(min-width:1024px){ .topo-marca{display:none} }
   .content{padding:16px 16px calc(var(--tabbar) + 28px + env(safe-area-inset-bottom));max-width:1180px;width:100%;margin:0 auto}
   .page{animation:pagina .34s var(--ease) both}
@@ -511,9 +514,13 @@
       <button class="icon-btn close-btn" id="close-btn" aria-label="Fechar menu">✕</button>
     </div>
     <nav class="nav">
+      <button class="nav-item" data-page="maquinas"><span class="ni">🏭</span>Minhas Máquinas</button>
       <button class="nav-item" data-page="geral"><span class="ni">🏠</span>Visão Geral</button>
       <button class="nav-item" data-page="bomba"><span class="ni">💧</span>Controle da Bomba</button>
       <button class="nav-item" data-page="transacoes"><span class="ni">💰</span>Transações</button>
+      <button class="nav-item" data-page="clientes"><span class="ni">👥</span>Clientes</button>
+      <button class="nav-item" data-page="cartoes"><span class="ni">🪪</span>Cartões<span class="nav-badge" id="nb-cartoes" hidden>0</span></button>
+      <button class="nav-item" data-page="promocoes"><span class="ni">🎉</span>Promoções</button>
       <button class="nav-item" data-page="estornos"><span class="ni">↩️</span>Estornos<span class="nav-badge" id="nb-estornos" hidden>0</span></button>
       <button class="nav-item" data-page="relatorios"><span class="ni">📊</span>Relatórios</button>
       <button class="nav-item" data-page="conexao"><span class="ni">📡</span>Conexão</button>
@@ -534,6 +541,7 @@
       <button class="icon-btn menu-btn" id="menu-btn" aria-label="Abrir menu" aria-expanded="false" aria-controls="sidebar" hidden>☰</button>
       <span class="topo-marca" aria-hidden="true"><svg viewBox="0 0 24 24" width="17" height="17" fill="#fff"><path d="M12 2.7c-.3 0-.6.2-.8.4C9.6 5.3 5 11.4 5 15a7 7 0 0 0 14 0c0-3.6-4.6-9.7-6.2-11.9-.2-.2-.5-.4-.8-.4z"/></svg></span>
       <h1 id="page-title">Visão Geral</h1>
+      <select id="sel-maquina" class="input sel-maq" aria-label="Máquina selecionada"></select>
       <span class="pill wait esp-pill"><span class="dot"></span><span class="txt">Conectando…</span></span>
       <button class="icon-btn bell" id="bell" aria-label="Notificações">🔔<span class="bell-count" id="bell-count" hidden>0</span></button>
     </header>
@@ -549,6 +557,135 @@
     </div>
 
     <main class="content">
+
+      <!-- ===== MÁQUINAS ===== -->
+      <section class="page" id="p-maquinas" hidden>
+        <div class="card">
+          <div class="card-head">
+            <div><h2>🏭 Minhas máquinas</h2><p class="hint">Todas no mesmo login. Toque em uma para abrir o painel dela.</p></div>
+            <div class="chips"><button class="btn btn-sm btn-ghost" id="btn-antiga">Cadastrar a que já existe</button><button class="btn btn-sm btn-primary" id="btn-nova">+ Nova máquina</button></div>
+          </div>
+          <ul class="list" id="maq-list"></ul>
+          <p class="fb" id="fb-antiga"></p>
+          <p class="note">Máquina que já roda neste projeto grava na raiz do banco. Cadastre como "formato antigo" para vê-la aqui agora, sem regravar nada nela.</p>
+        </div>
+
+        <div class="card mt" id="card-nova" hidden>
+          <div class="card-head"><div><h2>Nova máquina</h2><p class="hint">Preencha os dados. Eu gero o firmware já configurado e crio a máquina no painel.</p></div></div>
+          <form id="form-nova" novalidate>
+            <div class="campo-2">
+              <div class="field" style="margin:0"><label for="n-nome">Nome da máquina</label><input id="n-nome" class="input" placeholder="Vision Espinho" autocomplete="off"></div>
+              <div class="field" style="margin:0"><label for="n-id">Identificador</label><input id="n-id" class="input mono" placeholder="espinho" autocomplete="off"></div>
+            </div>
+            <p class="hint" style="margin-top:6px">O identificador é o nome da pasta dela no banco. Use letras minúsculas, sem espaço nem acento.</p>
+
+            <div class="campo-2 mt">
+              <div class="field" style="margin:0"><label for="n-ssid">Rede Wi-Fi do local</label><input id="n-ssid" class="input" autocomplete="off"></div>
+              <div class="field" style="margin:0"><label for="n-wpass">Senha do Wi-Fi</label><input id="n-wpass" class="input" autocomplete="off"></div>
+            </div>
+
+            <div class="field"><label for="n-token">Token do Mercado Pago da conta que recebe os PIX</label>
+              <input id="n-token" class="input mono" placeholder="APP_USR-..." autocomplete="off" spellcheck="false"></div>
+
+            <div class="campo-2 mt-s">
+              <div class="field" style="margin:0"><label for="n-valor">Valor do PIX (R$)</label><input id="n-valor" class="input" inputmode="decimal" placeholder="2,50" autocomplete="off"></div>
+              <div class="field" style="margin:0"><label for="n-tempo">Tempo da bomba (s)</label><input id="n-tempo" class="input" type="number" min="5" max="300" value="30"></div>
+            </div>
+
+            <div class="campo-2 mt-s">
+              <div class="field" style="margin:0"><label for="n-email">E-mail do login da máquina</label><input id="n-email" class="input" type="email" autocomplete="off"></div>
+              <div class="field" style="margin:0"><label for="n-senha">Senha desse login</label><input id="n-senha" class="input" autocomplete="off"></div>
+            </div>
+            <p class="hint" style="margin-top:6px">É a conta que a ESP32 usa para entrar no Firebase. Pode ser a mesma para todas as máquinas.</p>
+
+            <ul class="regras mt">
+              <li>🔒 <span>A máquina nasce em <b>modo simulação</b>: nos primeiros dias ela anota o que faria, sem devolver dinheiro.</span></li>
+              <li>📦 <span>Firebase, banco e regras são os mesmos deste painel. Você não precisa criar projeto novo.</span></li>
+            </ul>
+            <p class="fb" id="fb-nova"></p>
+            <div class="btn-row">
+              <button class="btn btn-ghost" type="button" id="n-cancelar">Cancelar</button>
+              <button class="btn btn-primary" type="submit">Criar e baixar firmware</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- ===== CLIENTES (CRÉDITOS) ===== -->
+      <section class="page" id="p-clientes" hidden>
+        <div class="sum-grid">
+          <div class="card sum"><span class="sum-l">Clientes</span><span class="sum-v" id="c-qtd">0</span><span class="sum-s">cadastrados</span></div>
+          <div class="card sum s-ok"><span class="sum-l">Saldo em créditos</span><span class="sum-v" id="c-saldo">—</span><span class="sum-s">a consumir</span></div>
+          <div class="card sum"><span class="sum-l">Com saldo</span><span class="sum-v" id="c-ativos">0</span><span class="sum-s">clientes</span></div>
+        </div>
+        <div class="card mt">
+          <div class="card-head"><div><h2>🎁 Programa de cashback</h2><p class="hint">Porcentagem devolvida a cada retirada. O cliente acumula e troca por créditos.</p></div>
+            <label class="switch"><input type="checkbox" id="cb-ativo" aria-label="Cashback ativo"><span class="track"></span></label>
+          </div>
+          <form id="form-cashback" novalidate>
+            <div class="campo-2">
+              <div class="field" style="margin:0"><label for="cb-percent">Devolver (%)</label><input id="cb-percent" class="input" type="number" min="0" max="50" step="0.5"></div>
+              <div class="field" style="margin:0"><label for="cb-minimo">Mínimo para resgatar (R$)</label><input id="cb-minimo" class="input" type="number" min="1" max="500" step="1"></div>
+            </div>
+            <ul class="regras mt"><li id="cb-exemplo"></li></ul>
+            <p class="fb" id="fb-cashback"></p>
+            <button class="btn btn-primary mt-s" type="submit">Salvar programa</button>
+          </form>
+        </div>
+
+        <div class="card mt">
+          <div class="card-head">
+            <div><h2>👥 Clientes e créditos</h2><p class="hint">Saldo pré-pago de cada cliente. Toque para ver o extrato.</p></div>
+          </div>
+          <input id="c-busca" class="input" type="search" placeholder="Buscar por nome ou e-mail" autocomplete="off">
+          <ul class="list mt-s" id="c-list"></ul>
+        </div>
+      </section>
+
+      <!-- ===== CARTÕES RFID ===== -->
+      <section class="page" id="p-cartoes" hidden>
+        <div class="card">
+          <div class="card-head">
+            <div><h2>📮 Solicitações de cartão</h2><p class="hint">Pedidos feitos pelos clientes no aplicativo. Avance a etapa e, na entrega, vincule a tag.</p></div>
+            <span class="badge attn" id="ped-contador" hidden>0</span>
+          </div>
+          <ul class="list" id="ped-list"></ul>
+        </div>
+
+        <div class="card mt">
+          <div class="card-head">
+            <div><h2>🪪 Último cartão encostado</h2><p class="hint">Peça para o cliente encostar o cartão no leitor. Ele aparece aqui na hora.</p></div>
+          </div>
+          <div id="cartao-vazio" class="empty">Nenhum cartão foi encostado ainda nesta máquina.</div>
+          <ul class="list" id="cartao-ultimo"></ul>
+        </div>
+
+        <div class="card mt">
+          <div class="card-head">
+            <div><h2>Cartões cadastrados</h2><p class="hint">Cada cartão pertence a um cliente e gasta o saldo dele.</p></div>
+          </div>
+          <input id="ct-busca" class="input" type="search" placeholder="Buscar por apelido, cliente ou número" autocomplete="off">
+          <ul class="list mt-s" id="ct-list"></ul>
+          <p class="note">O número do cartão pode ser copiado por quem tiver um leitor. Por isso, bloqueie cartões perdidos e confira o extrato do cliente se algo parecer estranho.</p>
+        </div>
+      </section>
+
+      <!-- ===== PROMOÇÕES ===== -->
+      <section class="page" id="p-promocoes" hidden>
+        <div class="card">
+          <div class="card-head"><div><h2>🎉 Nova promoção</h2><p class="hint">Aparece no aplicativo de todos os clientes, com aviso de novidade.</p></div></div>
+          <form id="form-promo" novalidate>
+            <div class="field"><label for="pr-titulo">Título</label><input id="pr-titulo" class="input" placeholder="Recarregue R$ 50 e ganhe 10% de volta" maxlength="70"></div>
+            <div class="field"><label for="pr-texto">Texto</label><textarea id="pr-texto" class="input" style="min-height:90px" placeholder="Explique a promoção em poucas linhas" maxlength="300"></textarea></div>
+            <p class="fb" id="fb-promo"></p>
+            <button class="btn btn-primary mt-s" type="submit">Publicar promoção</button>
+          </form>
+        </div>
+        <div class="card mt">
+          <div class="card-head"><div><h2>Promoções publicadas</h2><p class="hint">Desligue para tirar do aplicativo sem apagar.</p></div></div>
+          <ul class="list" id="promo-list"></ul>
+        </div>
+      </section>
 
       <!-- ===== VISÃO GERAL ===== -->
       <section class="page" id="p-geral">
@@ -969,6 +1106,7 @@
 
   <!-- barra de abas (celular) -->
   <nav class="tabbar" id="tabbar" aria-label="Navegação">
+    <button class="tab" data-page="maquinas"><span class="ti">🏭</span>Máquinas</button>
     <button class="tab" data-page="geral"><span class="ti">🏠</span>Início</button>
     <button class="tab" data-page="transacoes"><span class="ti">💰</span>Transações</button>
     <button class="tab" data-page="estornos"><span class="ti">↩️</span>Estornos<span class="tab-badge" id="tb-estornos" hidden>0</span></button>
@@ -985,7 +1123,11 @@
         <span class="avatar" id="sheet-ini">•</span>
         <div style="min-width:0"><div class="user-email" id="sheet-email"></div><div class="hint" style="margin:0">Administração</div></div>
       </div>
+      <button class="sheet-item" data-page="maquinas"><span class="si">🏭</span>Minhas Máquinas</button>
       <button class="sheet-item" data-page="bomba"><span class="si">💧</span>Controle da Bomba</button>
+      <button class="sheet-item" data-page="clientes"><span class="si">👥</span>Clientes e créditos</button>
+      <button class="sheet-item" data-page="cartoes"><span class="si">🪪</span>Cartões e solicitações</button>
+      <button class="sheet-item" data-page="promocoes"><span class="si">🎉</span>Promoções</button>
       <button class="sheet-item" data-page="conexao"><span class="si">📡</span>Conexão</button>
       <button class="sheet-item" data-page="config"><span class="si">⚙️</span>Configurações</button>
       <button class="sheet-item" data-page="logsesp"><span class="si">📝</span>Logs da máquina</button>
@@ -1023,9 +1165,2048 @@
 
 <div class="toasts" id="toasts" aria-live="polite"></div>
 
+<script type="text/plain" id="tpl-firmware">
+/* ================================================================
+ *  VISION ÁGUA — Firmware ESP32
+ *  Versão 2.1.0
+ *
+ *  Segurança do dinheiro (nunca devolver uma venda entregue):
+ *   1. Anota a entrega na memória permanente ANTES de abrir a bomba
+ *   2. Livro de entregas separado no Firebase (/entregas), só de escrita
+ *   4. Só devolve sozinha quando a memória local cobre a data do pagamento
+ *   5. Negativa por padrão: sem três provas positivas, não devolve
+ *   7. Freio: limites por hora, por dia, por porcentagem e pausa após entrega
+ *   8. Modo simulação: registra o que faria, sem devolver de verdade
+ *
+ *  Autonomia: reconexão em camadas, registro de quedas e falta de energia,
+ *  fila de estornos persistente e atualização remota (OTA).
+ * ================================================================ */
+
+#include <WiFi.h>
+#include <WiFiClientSecure.h>
+#include <HTTPClient.h>
+#include <ArduinoJson.h>
+#include <time.h>
+#include <ctype.h>
+#include <string.h>
+#include <Firebase_ESP_Client.h>
+#include "addons/TokenHelper.h"
+#include "addons/RTDBHelper.h"
+#include <HTTPUpdate.h>
+#include <esp_task_wdt.h>
+#include <esp_system.h>
+#include <Preferences.h>
+#include <SPI.h>
+#include <MFRC522.h>      // leitor de cartão RFID (biblioteca "MFRC522" by GithubCommunity)
+
+#define FW_VERSAO "3.4.0"
+
+// ================= IDENTIFICAÇÃO DESTA MÁQUINA =================
+// Tudo o que esta máquina grava fica dentro de /maquinas/<MAQUINA_ID>/ no Firebase,
+// então várias máquinas convivem no mesmo projeto e no mesmo painel.
+#define MAQUINA_ID     "__MAQUINA_ID__"
+#define MAQUINA_NOME   "__MAQUINA_NOME__"
+
+// ================= CONFIGURAÇÕES =================
+const char* WIFI_SSID  = "__WIFI_SSID__";
+const char* WIFI_PASS  = "__WIFI_PASS__";
+const char* MP_TOKEN   = "__MP_TOKEN__";
+
+#define API_KEY        "__API_KEY__"
+#define DATABASE_URL   "__DATABASE_URL__"
+#define FB_EMAIL       "__FB_EMAIL__"
+#define FB_PASSWORD    "__FB_PASSWORD__"
+
+// ⚙️ PARÂMETROS GERAIS
+#define TEMPO_BOMBA_SEG          30
+#define PIN_RELE                 25
+#define EPOCA_MINIMA             1700000000UL
+#define LIMITE_CONSULTA_MP       5
+#define LIMITE_VARREDURA_MP      30
+#define INTERVALO_CONSULTA_MS    1000
+#define TAMANHO_BUFFER_JSON      8192
+#define FUSO_HORARIO_BR_SEG      (-3 * 3600)
+
+// 💸 REGRAS DE ESTORNO (padrões — o painel altera em /config)
+#define JANELA_ESTORNO_MIN_PADRAO  10
+#define LIBERAR_ATE_SEG_PADRAO     120
+#define MAX_TENTATIVAS_ESTORNO     6
+static const uint32_t ESPERA_TENTATIVA_SEG[MAX_TENTATIVAS_ESTORNO] = {0, 60, 300, 900, 1800, 3600};
+
+// 🛑 FREIO DE SEGURANÇA (padrões — o painel altera em /config)
+#define MAX_ESTORNOS_HORA_PADRAO   3
+#define MAX_ESTORNOS_DIA_PADRAO    10
+#define PAUSA_APOS_ENTREGA_PADRAO  90    // segundos sem estorno automático após liberar água
+#define PERCENTUAL_MAX_PADRAO      20    // % de estornos sobre as vendas do dia
+
+// 🧾 PROVA DE ENTREGA
+#define MAX_ENTREGAS_NVS           40    // entregas guardadas na memória permanente
+
+// 🪪 LEITOR DE CARTÃO RFID (MFRC522)
+//  Ligação: SDA/SS→25? não. Use: SS→GPIO5, SCK→18, MOSI→23, MISO→19, RST→22, 3V3 e GND.
+//  Atenção: o módulo é de 3,3V. Nunca ligue no 5V.
+#define RFID_ATIVO           true
+#define PIN_RFID_SS          5
+#define PIN_RFID_RST         22
+#define PIN_BIP              -1     // opcional: pino de um buzzer. -1 desliga
+#define RFID_REPETE_SEG      8      // ignora o mesmo cartão encostado de novo nesse tempo
+
+// 💳 CRÉDITOS PRÉ-PAGOS (carteira do cliente)
+#define RECARGA_MIN                1.0   // valor mínimo de recarga
+#define RECARGA_MAX                500.0 // valor máximo de recarga
+#define VALIDADE_PEDIDO_SEG        90    // pedido de água feito pelo app expira nisso
+#define MAX_POR_CICLO              3     // quantas recargas/pedidos processa por vez
+
+// 🐕 AUTO-RECUPERAÇÃO
+#define WDT_TIMEOUT_SEG            60
+#define TIMEOUT_HTTP_CONEXAO_MS    8000
+#define TIMEOUT_HTTP_RESPOSTA_MS   10000
+#define WIFI_TENTATIVA_MS          10000
+#define WIFI_RESET_RADIO_SEG       60
+#define WIFI_REINICIO_1_SEG        180
+#define WIFI_REINICIO_N_SEG        600
+#define SEM_INTERNET_SEG           60
+#define INTERNET_REFAZ_WIFI_SEG    120
+#define FIREBASE_SEM_SUCESSO_SEG   300
+#define MP_SEM_CONTATO_SEG         900
+#define HEAP_MIN_LIVRE             30000
+#define HEAP_MIN_BLOCO             20000
+#define HEAP_CHECAGENS_SEGUIDAS    3
+#define REINICIO_PREVENTIVO_HORAS  0
+
+// Caminho base desta máquina no Firebase
+String base() { return String("/maquinas/") + MAQUINA_ID; }
+
+// ================= OBJETOS =================
+FirebaseData fbdo;
+FirebaseAuth auth;
+FirebaseConfig fbConfig;
+Preferences prefs;
+MFRC522 leitorRFID(PIN_RFID_SS, PIN_RFID_RST);
+String   ultimaTag = "";
+time_t   ultimaTagEm = 0;
+
+// ================= ESTADO =================
+bool          bombaAtiva      = false;
+unsigned long fimBomba        = 0;
+unsigned int  tempoBombaSeg   = TEMPO_BOMBA_SEG;
+unsigned long duracaoBomba    = TEMPO_BOMBA_SEG * 1000UL;
+
+bool          sistemaLigado   = true;
+float         valorEsperado   = 0;
+unsigned int  janelaEstornoMin = JANELA_ESTORNO_MIN_PADRAO;
+unsigned int  liberarAteSeg    = LIBERAR_ATE_SEG_PADRAO;
+bool          estornoAutoValor   = true;
+bool          estornoAutoPausado = true;
+bool          liberarAposVoltar  = false;   // false = PIX pago com a maquina fora do ar NUNCA libera agua
+bool          creditosPorPosto   = true;    // credito do cliente so vale no posto onde ele se cadastrou
+bool          cashbackAtivo      = false;   // programa de bonificacao (definido no painel master)
+float         cashbackPercent    = 0;       // % de volta em cada consumo
+float         cashbackMinimo     = 5.0;     // valor minimo para o cliente resgatar
+time_t        operacionalDesde   = 0;       // desde quando ela esta de fato atendendo (online e pronta)
+bool          modoSimulacao      = false;
+unsigned int  maxEstornosHora  = MAX_ESTORNOS_HORA_PADRAO;
+unsigned int  maxEstornosDia   = MAX_ESTORNOS_DIA_PADRAO;
+unsigned int  pausaAposEntrega = PAUSA_APOS_ENTREGA_PADRAO;
+unsigned int  percentualMax    = PERCENTUAL_MAX_PADRAO;
+bool          configCarregada  = false;
+
+float         valorAnterior   = -1;
+unsigned int  tempoAnterior   = 0;
+
+bool          horarioSincronizado = false;
+unsigned long ultimoPedidoNTP     = 0;
+bool          nuvemIniciada       = false;
+bool          precisaVarredura    = true;
+bool          filaUrgente         = false;
+
+unsigned long ultimoFirebaseOk    = 0;
+unsigned long ultimoMPContato     = 0;
+bool          wifiRefeitoInternet = false;
+
+// Wi-Fi
+volatile uint8_t wifiMotivoCod   = 0;
+unsigned long    wifiCaiuEm      = 0;
+unsigned long    ultimaTentativaWiFi = 0;
+bool             radioReiniciado = false;
+
+// Queda de conexão
+bool     emQueda        = false;
+time_t   quedaInicio    = 0;
+String   quedaMotivo    = "";
+uint16_t quedaTentativas = 0;
+uint16_t quedaReinicios  = 0;
+
+// Boot
+String        motivoRebootSalvo = "";
+unsigned long vivoAnterior      = 0;
+bool          eventoBootPendente = true;
+
+// Memória rápida de IDs já tratados
+#define MAX_IDS 60
+String idsProcessados[MAX_IDS];
+int    proxIdMem = 0;
+
+// 🧾 PROVA DE ENTREGA — memória permanente
+String   walIds[MAX_ENTREGAS_NVS];
+uint32_t walTs[MAX_ENTREGAS_NVS];
+uint8_t  walPos = 0;
+time_t   coberturaDesde = 0;     // a partir de quando a lista local é confiável
+
+// 🛑 FREIO
+bool     freioAtivo   = false;
+String   freioMotivo  = "";
+uint16_t estornosHora = 0, estornosDia = 0, entregasDia = 0;
+uint32_t janelaHora = 0, janelaDia = 0;
+time_t   ultimaEntregaTs = 0;
+
+// Registros que falharam ao gravar (a água já saiu — não pode perder)
+struct RegistroPendente {
+  bool   ativo, faltaEntrega, faltaTransacao;
+  String id, origem, motivo, por;
+  float  valor;
+  long   atraso;
+  time_t dataPag;
+};
+#define MAX_PENDENTES 8
+RegistroPendente pendentes[MAX_PENDENTES];
+
+// ==================================================
+// 🐕 WATCHDOG / REINÍCIO SEGURO
+// ==================================================
+void iniciarWatchdog() {
+#if defined(ESP_ARDUINO_VERSION_MAJOR) && ESP_ARDUINO_VERSION_MAJOR >= 3
+  esp_task_wdt_config_t cfg;
+  cfg.timeout_ms = WDT_TIMEOUT_SEG * 1000;
+  cfg.idle_core_mask = 0;
+  cfg.trigger_panic = true;
+  if (esp_task_wdt_reconfigure(&cfg) == ESP_ERR_INVALID_STATE) esp_task_wdt_init(&cfg);
+#else
+  esp_task_wdt_init(WDT_TIMEOUT_SEG, true);
+#endif
+  esp_task_wdt_add(NULL);
+}
+inline void alimentarWDT() { esp_task_wdt_reset(); }
+
+const char* causaResetChip() {
+  switch (esp_reset_reason()) {
+    case ESP_RST_POWERON:   return "energia ligada";
+    case ESP_RST_SW:        return "reinicio por software";
+    case ESP_RST_PANIC:     return "travamento (crash)";
+    case ESP_RST_INT_WDT:   return "watchdog interno";
+    case ESP_RST_TASK_WDT:  return "watchdog (loop travou)";
+    case ESP_RST_WDT:       return "watchdog";
+    case ESP_RST_BROWNOUT:  return "queda de tensao";
+    case ESP_RST_DEEPSLEEP: return "saida de deep sleep";
+    default:                return "desconhecido";
+  }
+}
+
+void reiniciarSeguro(const char* motivo) {
+  Serial.printf("\n🔄 REINICIANDO — motivo: %s\n", motivo);
+  digitalWrite(PIN_RELE, LOW);
+  prefs.begin("boot", false);
+  prefs.putString("motivo", motivo);
+  prefs.end();
+  Serial.flush();
+  delay(200);
+  ESP.restart();
+}
+
+// ==================================================
+// 🧰 UTILIDADES
+// ==================================================
+time_t agoraUTC() { return horarioSincronizado ? time(nullptr) : 0; }
+
+String horaBR(time_t t) {
+  if (!t) return "?";
+  time_t local = t + FUSO_HORARIO_BR_SEG;
+  struct tm tmv;
+  gmtime_r(&local, &tmv);
+  char buf[20];
+  strftime(buf, sizeof(buf), "%d/%m %H:%M", &tmv);
+  return String(buf);
+}
+
+String duracaoTxt(long seg) {
+  if (seg < 0) return "tempo desconhecido";
+  if (seg < 60) return String(seg) + "s";
+  if (seg < 3600) return String(seg / 60) + "min";
+  if (seg < 86400) return String(seg / 3600) + "h " + String((seg % 3600) / 60) + "min";
+  return String(seg / 86400) + "d " + String((seg % 86400) / 3600) + "h";
+}
+
+String resumo(const String &texto, unsigned int max = 200) {
+  String t = texto;
+  t.replace("\n", " ");
+  t.trim();
+  if (t.length() > max) t = t.substring(0, max) + "...";
+  return t;
+}
+
+String motivoWiFi(uint8_t cod) {
+  switch (cod) {
+    case 2:   return "sessao expirou no roteador";
+    case 3:   return "roteador encerrou a sessao";
+    case 4:   return "associacao expirou";
+    case 8:   return "roteador desconectou a ESP";
+    case 15:  return "senha do Wi-Fi recusada";
+    case 200: return "sinal do roteador sumiu";
+    case 201: return "rede nao encontrada (roteador desligado ou fora de alcance)";
+    case 202: return "falha de autenticacao (senha)";
+    case 203: return "falha ao associar";
+    case 204: return "tempo esgotado na conexao";
+    case 205: return "falha de conexao";
+    case 0:   return "motivo nao informado";
+    default:  return "codigo " + String(cod);
+  }
+}
+
+void aoEventoWiFi(WiFiEvent_t evento, WiFiEventInfo_t info) {
+  if (evento == ARDUINO_EVENT_WIFI_STA_DISCONNECTED) wifiMotivoCod = info.wifi_sta_disconnected.reason;
+}
+
+bool caminhoInexistente() {
+  if (fbdo.dataType() == "null") return true;
+  String e = fbdo.errorReason();
+  e.toLowerCase();
+  return e.indexOf("not exist") >= 0 || e.indexOf("path not") >= 0;
+}
+
+bool firebaseUtilizavel() { return WiFi.status() == WL_CONNECTED && Firebase.ready(); }
+bool prontoParaPagamentos() { return horarioSincronizado && configCarregada && firebaseUtilizavel(); }
+
+// ==================================================
+// 🧠 MEMÓRIA DE IDs
+// ==================================================
+bool idNaMemoria(const String &id) {
+  for (int i = 0; i < MAX_IDS; i++) if (idsProcessados[i] == id) return true;
+  return false;
+}
+void lembrarId(const String &id) {
+  if (id.length() == 0 || idNaMemoria(id)) return;
+  idsProcessados[proxIdMem] = id;
+  proxIdMem = (proxIdMem + 1) % MAX_IDS;
+}
+
+// ==================================================
+// 🧾 (1) PROVA DE ENTREGA NA MEMÓRIA PERMANENTE
+//  Gravada ANTES de acionar a bomba. Sobrevive a queda
+//  de energia, reinício e falta de internet.
+// ==================================================
+void walCarregar() {
+  prefs.begin("wal", false);
+  walPos = prefs.getUChar("p", 0) % MAX_ENTREGAS_NVS;
+  uint32_t inicio = prefs.getULong("ini", 0);
+  bool cheia = true;
+  uint32_t maisAntiga = 0xFFFFFFFF;
+  for (uint8_t i = 0; i < MAX_ENTREGAS_NVS; i++) {
+    char k[8];
+    snprintf(k, sizeof(k), "i%u", i);
+    walIds[i] = prefs.getString(k, "");
+    snprintf(k, sizeof(k), "t%u", i);
+    walTs[i] = prefs.getULong(k, 0);
+    if (walIds[i].length()) { lembrarId(walIds[i]); if (walTs[i] && walTs[i] < maisAntiga) maisAntiga = walTs[i]; }
+    else cheia = false;
+  }
+  prefs.end();
+  // Se a lista encheu, só dá para garantir a partir da entrega mais antiga guardada
+  coberturaDesde = (cheia && maisAntiga != 0xFFFFFFFF) ? (time_t)maisAntiga : (time_t)inicio;
+  Serial.printf("🧾 Prova de entrega: %s | cobertura desde %s\n",
+                cheia ? "lista cheia" : "lista parcial", horaBR(coberturaDesde).c_str());
+}
+
+void walMarcarInicio() {   // registra desde quando esta memória existe
+  if (coberturaDesde || !horarioSincronizado) return;
+  prefs.begin("wal", false);
+  uint32_t ini = prefs.getULong("ini", 0);
+  if (!ini) { ini = (uint32_t)time(nullptr); prefs.putULong("ini", ini); }
+  prefs.end();
+  coberturaDesde = (time_t)ini;
+}
+
+void walRegistrar(const String &id, time_t dataPag) {
+  prefs.begin("wal", false);
+  char k[8];
+  snprintf(k, sizeof(k), "i%u", walPos); prefs.putString(k, id);
+  snprintf(k, sizeof(k), "t%u", walPos); prefs.putULong(k, (uint32_t)(dataPag ? dataPag : agoraUTC()));
+  walIds[walPos] = id;
+  walTs[walPos] = (uint32_t)(dataPag ? dataPag : agoraUTC());
+  walPos = (walPos + 1) % MAX_ENTREGAS_NVS;
+  prefs.putUChar("p", walPos);
+  prefs.end();
+  lembrarId(id);
+}
+
+bool walTem(const String &id) {
+  for (uint8_t i = 0; i < MAX_ENTREGAS_NVS; i++) if (walIds[i].length() && walIds[i] == id) return true;
+  return false;
+}
+
+// ==================================================
+// 📝 LOGS
+// ==================================================
+void logESP(const String &nivel, const String &mensagem) {
+  Serial.printf("📝 [%s] %s\n", nivel.c_str(), mensagem.c_str());
+  if (!firebaseUtilizavel()) return;
+  FirebaseJson json;
+  json.set("timestamp", (int)agoraUTC());
+  json.set("nivel", nivel);
+  json.set("mensagem", mensagem);
+  Firebase.RTDB.pushJSON(&fbdo, base() + "/logs/esp", &json);
+}
+
+void logAPI(const String &endpoint, int httpCode, const String &detalhe) {
+  Serial.printf("🌐 [%s] HTTP %d %s\n", endpoint.c_str(), httpCode, detalhe.c_str());
+  if (!firebaseUtilizavel()) return;
+  FirebaseJson json;
+  json.set("timestamp", (int)agoraUTC());
+  json.set("endpoint", endpoint);
+  json.set("http_code", httpCode);
+  json.set("detalhe", resumo(detalhe, 300));
+  Firebase.RTDB.pushJSON(&fbdo, base() + "/logs/api", &json);
+}
+
+// ==================================================
+// 📡 QUEDAS DE CONEXÃO
+// ==================================================
+void salvarQuedaNVS() {
+  prefs.begin("cx", false);
+  prefs.putULong("off_ini", (uint32_t)quedaInicio);
+  prefs.putString("off_mot", quedaMotivo);
+  prefs.putUShort("off_rb", quedaReinicios);
+  prefs.end();
+}
+void limparQuedaNVS() {
+  prefs.begin("cx", false);
+  prefs.remove("off_ini"); prefs.remove("off_mot"); prefs.remove("off_rb");
+  prefs.end();
+}
+
+void iniciarQueda(const String &motivo) {
+  if (emQueda) return;
+  emQueda = true;
+  quedaInicio = agoraUTC();
+  if (!quedaInicio) quedaInicio = (time_t)vivoAnterior;
+  quedaMotivo = motivo;
+  quedaTentativas = 0;
+  salvarQuedaNVS();
+  Serial.printf("📴 QUEDA DE CONEXÃO — %s (desde %s)\n", motivo.c_str(), horaBR(quedaInicio).c_str());
+}
+
+void encerrarQueda() {
+  if (!emQueda) return;
+  time_t fim = agoraUTC();
+  long dur = (quedaInicio && fim >= quedaInicio) ? (long)(fim - quedaInicio) : -1;
+
+  FirebaseJson j;
+  j.set("tipo", "queda");
+  j.set("inicio", (int)quedaInicio);
+  j.set("fim", (int)fim);
+  j.set("duracao_seg", (int)dur);
+  j.set("motivo", quedaMotivo);
+  j.set("tentativas_wifi", (int)quedaTentativas);
+  j.set("reinicios", (int)quedaReinicios);
+  j.set("timestamp", (int)fim);
+  if (!Firebase.RTDB.pushJSON(&fbdo, base() + "/logs/conexao", &j)) return;
+
+  String msg = "Conexão restabelecida — ficou offline de " + horaBR(quedaInicio) + " até " + horaBR(fim) +
+               " (" + duracaoTxt(dur) + "). Motivo: " + quedaMotivo +
+               ". Tentativas de Wi-Fi: " + String(quedaTentativas) +
+               (quedaReinicios ? (", reinícios: " + String(quedaReinicios)) : "");
+  emQueda = false;
+  quedaReinicios = 0;
+  limparQuedaNVS();
+  precisaVarredura = true;
+  operacionalDesde = fim;   // só atende de verdade a partir de agora
+  logESP("warn", msg);
+}
+
+void publicarEventoBoot() {
+  if (!eventoBootPendente || !horarioSincronizado) return;
+  esp_reset_reason_t r = esp_reset_reason();
+  time_t boot = agoraUTC() - (time_t)(millis() / 1000);
+  bool semEnergia = (r == ESP_RST_POWERON || r == ESP_RST_BROWNOUT);
+
+  if (vivoAnterior > 0) {
+    long parada = (boot > (time_t)vivoAnterior) ? (long)(boot - (time_t)vivoAnterior) : 0;
+    FirebaseJson j;
+    j.set("tipo", semEnergia ? "sem_energia" : "reinicio");
+    j.set("inicio", (int)vivoAnterior);
+    j.set("fim", (int)boot);
+    j.set("duracao_seg", (int)parada);
+    j.set("motivo", motivoRebootSalvo.length() ? motivoRebootSalvo : String(causaResetChip()));
+    j.set("causa_chip", causaResetChip());
+    j.set("versao", FW_VERSAO);
+    j.set("timestamp", (int)boot);
+    if (!Firebase.RTDB.pushJSON(&fbdo, base() + "/logs/conexao", &j)) return;
+  }
+
+  bool anormal = motivoRebootSalvo.length() > 0 || (r != ESP_RST_POWERON && r != ESP_RST_SW);
+  String msg = String("Ligou — firmware ") + FW_VERSAO + " | causa: " + causaResetChip();
+  if (motivoRebootSalvo.length()) msg += " | motivo: " + motivoRebootSalvo;
+  if (vivoAnterior > 0) msg += " | última vez vista: " + horaBR((time_t)vivoAnterior);
+  msg += " | memória livre: " + String(ESP.getFreeHeap());
+  eventoBootPendente = false;
+  logESP(anormal ? "warn" : "info", msg);
+}
+
+void salvarVivo() {
+  if (!horarioSincronizado) return;
+  prefs.begin("cx", false);
+  prefs.putULong("vivo", (uint32_t)time(nullptr));
+  prefs.end();
+}
+
+// ==================================================
+// 📅 DATA DO MERCADO PAGO -> EPOCH UTC
+// ==================================================
+static time_t epochUTC(int ano, int mes, int dia, int hora, int min, int seg) {
+  int y = ano, m = mes;
+  y -= (m <= 2);
+  long era = (y >= 0 ? y : y - 399) / 400;
+  unsigned yoe = (unsigned)(y - era * 400);
+  unsigned doy = (unsigned)((153 * (m + (m > 2 ? -3 : 9)) + 2) / 5 + dia - 1);
+  unsigned doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
+  long dias = era * 146097 + (long)doe - 719468;
+  return (time_t)dias * 86400L + hora * 3600L + min * 60L + seg;
+}
+
+time_t parseData(const char* str) {
+  int ano, mes, dia, hora, min, seg;
+  if (sscanf(str, "%d-%d-%dT%d:%d:%d", &ano, &mes, &dia, &hora, &min, &seg) != 6) return 0;
+  time_t comoSeFosseUTC = epochUTC(ano, mes, dia, hora, min, seg);
+  const char* p = strchr(str, '.');
+  if (p) { p++; while (*p && isdigit((unsigned char)*p)) p++; }
+  else {
+    p = strchr(str + 10, '+');
+    if (!p) p = strpbrk(str + 10, "Z");
+    if (!p) p = str;
+  }
+  long offsetSeg = 0;
+  if (*p == 'Z') offsetSeg = 0;
+  else if (*p == '+' || *p == '-') {
+    int sinal = (*p == '-') ? -1 : 1;
+    int oh = 0, om = 0;
+    sscanf(p + 1, "%d:%d", &oh, &om);
+    offsetSeg = sinal * (oh * 3600L + om * 60L);
+  }
+  time_t t = comoSeFosseUTC - offsetSeg;
+  // (12) sanidade: data absurda não vira decisão
+  time_t agora = agoraUTC();
+  if (agora && (t > agora + 3600 || t < (time_t)EPOCA_MINIMA)) return 0;
+  return t;
+}
+
+// ==================================================
+// 🌐 CHAMADAS AO MERCADO PAGO
+// ==================================================
+int mpGet(const String &url, JsonDocument &doc, JsonDocument &filtro, String &erro) {
+  erro = "";
+  WiFiClientSecure cli;
+  cli.setInsecure();
+  cli.setTimeout(20);                                  // segundos: rede lenta não corta a resposta
+  HTTPClient http;
+  http.setConnectTimeout(TIMEOUT_HTTP_CONEXAO_MS);
+  http.setTimeout(TIMEOUT_HTTP_RESPOSTA_MS);
+  http.setReuse(false);
+  if (!http.begin(cli, url)) { erro = "nao foi possivel abrir a conexao"; return -1; }
+  http.addHeader("Authorization", String("Bearer ") + MP_TOKEN);
+  int cod = http.GET();
+  if (cod > 0) ultimoMPContato = millis();
+
+  if (cod == 200) {
+    // Lê a resposta inteira antes de interpretar: com sinal fraco, a leitura
+    // "em fluxo" chegava cortada (IncompleteInput) e nenhum PIX era processado.
+    String corpo = http.getString();
+    alimentarWDT();
+    if (corpo.length() < 2) {
+      erro = "resposta vazia do Mercado Pago";
+    } else {
+      DeserializationError e = deserializeJson(doc, corpo, DeserializationOption::Filter(filtro));
+      if (e) erro = String("JSON ilegivel: ") + e.c_str() + " (" + String(corpo.length()) +
+                    " bytes, memoria livre " + String(ESP.getFreeHeap()) + ")";
+    }
+  } else if (cod > 0) erro = resumo(http.getString(), 300);
+  else erro = HTTPClient::errorToString(cod);
+
+  http.end();
+  return cod;
+}
+
+int consultarPagamentoMP(const String &id, String &status, float &valor, String &erro) {
+  StaticJsonDocument<128> filtro;
+  filtro["status"] = true;
+  filtro["transaction_amount"] = true;
+  StaticJsonDocument<256> doc;
+  int cod = mpGet("https://api.mercadopago.com/v1/payments/" + id, doc, filtro, erro);
+  if (cod == 200 && erro.length() == 0) {
+    status = doc["status"] | "";
+    valor  = doc["transaction_amount"] | 0.0f;
+  }
+  return cod;
+}
+
+// POST genérico no Mercado Pago, com leitura filtrada da resposta
+int mpPost(const String &url, const String &corpo, const String &idem,
+           JsonDocument &doc, JsonDocument &filtro, String &erro) {
+  erro = "";
+  WiFiClientSecure cli;
+  cli.setInsecure();
+  cli.setTimeout(20);
+  HTTPClient http;
+  http.setConnectTimeout(TIMEOUT_HTTP_CONEXAO_MS);
+  http.setTimeout(TIMEOUT_HTTP_RESPOSTA_MS);
+  http.setReuse(false);
+  if (!http.begin(cli, url)) { erro = "nao foi possivel abrir a conexao"; return -1; }
+  http.addHeader("Authorization", String("Bearer ") + MP_TOKEN);
+  http.addHeader("Content-Type", "application/json");
+  if (idem.length()) http.addHeader("X-Idempotency-Key", idem);
+  int cod = http.POST(corpo);
+  if (cod > 0) ultimoMPContato = millis();
+  String resposta = (cod > 0) ? http.getString() : "";
+  http.end();
+  alimentarWDT();
+  if (cod == 200 || cod == 201) {
+    DeserializationError e = deserializeJson(doc, resposta, DeserializationOption::Filter(filtro));
+    if (e) erro = String("JSON ilegivel: ") + e.c_str();
+  } else erro = (cod > 0) ? resumo(resposta, 300) : HTTPClient::errorToString(cod);
+  return cod;
+}
+
+int pedirEstornoMP(const String &id, int tentativa, String &refundId, String &erro) {
+  erro = "";
+  WiFiClientSecure cli;
+  cli.setInsecure();
+  HTTPClient http;
+  http.setConnectTimeout(TIMEOUT_HTTP_CONEXAO_MS);
+  http.setTimeout(TIMEOUT_HTTP_RESPOSTA_MS);
+  if (!http.begin(cli, "https://api.mercadopago.com/v1/payments/" + id + "/refunds")) {
+    erro = "nao foi possivel abrir a conexao";
+    return -1;
+  }
+  http.addHeader("Authorization", String("Bearer ") + MP_TOKEN);
+  http.addHeader("Content-Type", "application/json");
+  http.addHeader("X-Idempotency-Key", id + "-refund-" + String(tentativa));
+  int cod = http.POST("{}");
+  if (cod > 0) ultimoMPContato = millis();
+  String corpo = (cod > 0) ? http.getString() : "";
+  http.end();
+
+  if (cod == 200 || cod == 201) {
+    StaticJsonDocument<64> filtro;
+    filtro["id"] = true;
+    StaticJsonDocument<128> doc;
+    if (!deserializeJson(doc, corpo, DeserializationOption::Filter(filtro))) refundId = doc["id"].as<String>();
+  } else erro = (cod > 0) ? resumo(corpo, 300) : HTTPClient::errorToString(cod);
+  return cod;
+}
+
+// ==================================================
+// 💾 REGISTROS
+// ==================================================
+bool registrar(const String &id, float valor, const String &status, const String &origem,
+               const String &motivo, long atrasoMin, time_t dataPag, const String &por = "") {
+  FirebaseJson j;
+  j.set("id", id);
+  j.set("valor", valor);
+  j.set("valor_esperado", valorEsperado);
+  j.set("status", status);
+  j.set("origem", origem);
+  j.set("motivo", motivo);
+  j.set("minutos_atraso", (int)atrasoMin);
+  j.set("data_pagamento_utc", (int)dataPag);
+  j.set("processado_em", (int)agoraUTC());
+  if (status == "estorno_pendente" || status == "estorno_simulado") {
+    j.set("motivo_estorno", motivo);
+    j.set("tentativas", 0);
+    j.set("ultimo_erro", "");
+  }
+  if (por.length()) j.set("autorizado_por", por);
+
+  bool ok = Firebase.RTDB.setJSON(&fbdo, base() + "/transacoes/" + id, &j);
+  Serial.printf("💾 /transacoes/%s -> %s | %s (%s)\n", id.c_str(), ok ? "GRAVADO ✅" : "FALHOU ❌",
+                status.c_str(), motivo.c_str());
+  if (ok) lembrarId(id);
+  return ok;
+}
+
+// (2) livro de entregas: escrito uma vez, nunca alterado
+bool registrarEntrega(const String &id, float valor, const String &origem, time_t dataPag) {
+  FirebaseJson j;
+  j.set("id", id);
+  j.set("valor", valor);
+  j.set("origem", origem);
+  j.set("entregue_em", (int)agoraUTC());
+  j.set("data_pagamento_utc", (int)dataPag);
+  j.set("tempo_bomba_seg", (int)tempoBombaSeg);
+  j.set("versao", FW_VERSAO);
+  bool ok = Firebase.RTDB.setJSON(&fbdo, base() + "/entregas/" + id, &j);
+  Serial.printf("🧾 /entregas/%s -> %s\n", id.c_str(), ok ? "GRAVADO ✅" : "FALHOU ❌");
+  return ok;
+}
+
+void guardarPendente(const String &id, float valor, const String &origem, const String &motivo,
+                     long atrasoMin, time_t dataPag, const String &por, bool faltaEntrega, bool faltaTransacao) {
+  for (int i = 0; i < MAX_PENDENTES; i++) {
+    if (!pendentes[i].ativo) {
+      pendentes[i] = {true, faltaEntrega, faltaTransacao, id, origem, motivo, por, valor, atrasoMin, dataPag};
+      Serial.printf("🕓 Registro de %s ficou pendente — vai tentar gravar de novo\n", id.c_str());
+      return;
+    }
+  }
+}
+
+void gravarPendentes() {
+  for (int i = 0; i < MAX_PENDENTES; i++) {
+    if (!pendentes[i].ativo) continue;
+    RegistroPendente &p = pendentes[i];
+    if (p.faltaEntrega && registrarEntrega(p.id, p.valor, p.origem, p.dataPag)) p.faltaEntrega = false;
+    alimentarWDT();
+    if (p.faltaTransacao && registrar(p.id, p.valor, "liberado", p.origem, p.motivo, p.atraso, p.dataPag, p.por)) p.faltaTransacao = false;
+    if (!p.faltaEntrega && !p.faltaTransacao) { p.ativo = false; p.id = ""; p.origem = ""; p.motivo = ""; p.por = ""; }
+    alimentarWDT();
+  }
+}
+
+// 1 = já tratado | 0 = novo | -1 = não deu para saber
+int statusConhecido(const String &id) {
+  if (idNaMemoria(id)) return 1;
+  if (Firebase.RTDB.getString(&fbdo, base() + "/transacoes/" + id + "/status")) {
+    String s = fbdo.stringData();
+    s.replace("\"", "");
+    if (s.length() > 0 && s != "null") { lembrarId(id); return 1; }
+    return 0;
+  }
+  return caminhoInexistente() ? 0 : -1;
+}
+
+// ==================================================
+// 🔒 (5) NEGATIVA POR PADRÃO
+//  1 = pode devolver | 0 = NÃO pode | -1 = não sei (tenta depois)
+// ==================================================
+int podeEstornar(const String &id, String &porque) {
+  if (walTem(id)) { porque = "a memoria local diz que a agua saiu"; return 0; }
+
+  if (Firebase.RTDB.getJSON(&fbdo, base() + "/entregas/" + id)) {
+    if (fbdo.dataType() != "null") { porque = "existe registro no livro de entregas"; return 0; }
+  } else if (!caminhoInexistente()) { porque = "nao consegui ler o livro de entregas"; return -1; }
+
+  if (Firebase.RTDB.getString(&fbdo, base() + "/transacoes/" + id + "/status")) {
+    String s = fbdo.stringData();
+    s.replace("\"", "");
+    if (s == "liberado" || s == "estornado" || s == "estorno_recusado") { porque = "transacao esta como " + s; return 0; }
+    return 1;
+  }
+  if (caminhoInexistente()) return 1;
+  porque = "nao consegui ler a transacao";
+  return -1;
+}
+
+// ==================================================
+// 🛑 (7) FREIO DE SEGURANÇA
+// ==================================================
+void freioCarregar() {
+  prefs.begin("frd", false);
+  freioAtivo   = prefs.getBool("ativo", false);
+  freioMotivo  = prefs.getString("motivo", "");
+  estornosHora = prefs.getUShort("eh", 0);
+  estornosDia  = prefs.getUShort("ed", 0);
+  entregasDia  = prefs.getUShort("vd", 0);
+  janelaHora   = prefs.getULong("jh", 0);
+  janelaDia    = prefs.getULong("jd", 0);
+  prefs.end();
+}
+void freioSalvar() {
+  prefs.begin("frd", false);
+  prefs.putBool("ativo", freioAtivo);
+  prefs.putString("motivo", freioMotivo);
+  prefs.putUShort("eh", estornosHora);
+  prefs.putUShort("ed", estornosDia);
+  prefs.putUShort("vd", entregasDia);
+  prefs.putULong("jh", janelaHora);
+  prefs.putULong("jd", janelaDia);
+  prefs.end();
+}
+void freioJanelas(time_t agora) {
+  if (!agora) return;
+  uint32_t h = (uint32_t)(agora / 3600), d = (uint32_t)(agora / 86400);
+  bool mudou = false;
+  if (h != janelaHora) { janelaHora = h; estornosHora = 0; mudou = true; }
+  if (d != janelaDia)  { janelaDia = d; estornosDia = 0; entregasDia = 0; mudou = true; }
+  if (mudou) freioSalvar();
+}
+void ativarFreio(const String &motivo) {
+  if (freioAtivo) return;
+  freioAtivo = true;
+  freioMotivo = motivo;
+  freioSalvar();
+  logESP("error", "🛑 FREIO ATIVADO — " + motivo + ". Nenhum estorno automático até você liberar no painel.");
+}
+void soltarFreio(const String &quem) {
+  if (!freioAtivo && estornosHora == 0 && estornosDia == 0) return;
+  freioAtivo = false;
+  freioMotivo = "";
+  estornosHora = 0;
+  estornosDia = 0;
+  freioSalvar();
+  logESP("warn", "Freio de estornos reativado pelo painel" + (quem.length() ? " (" + quem + ")" : ""));
+}
+// "" = liberado | "pausa" = adiar | outro texto = travar e mandar para decisão manual
+String freioBloqueia(time_t agora) {
+  if (freioAtivo) return freioMotivo;
+  if (pausaAposEntrega && ultimaEntregaTs && agora && agora - ultimaEntregaTs < (time_t)pausaAposEntrega) return "pausa";
+  if (estornosHora >= maxEstornosHora) return "limite de " + String(maxEstornosHora) + " estornos por hora";
+  if (estornosDia >= maxEstornosDia) return "limite de " + String(maxEstornosDia) + " estornos por dia";
+  if (entregasDia >= 5 && (uint32_t)estornosDia * 100UL >= (uint32_t)entregasDia * percentualMax)
+    return "estornos passaram de " + String(percentualMax) + "% das vendas do dia";
+  return "";
+}
+
+// ==================================================
+// ⚡ BOMBA
+// ==================================================
+void ligarBomba(const String &id, float valor, const String &origem, const String &motivo,
+                long atrasoMin, time_t dataPag, const String &por = "") {
+  // (1) prova de entrega ANTES de abrir a bomba
+  walRegistrar(id, dataPag ? dataPag : agoraUTC());
+
+  if (bombaAtiva) {
+    fimBomba += duracaoBomba;
+    Serial.println("💧 Bomba já estava ligada — tempo somado");
+  } else {
+    digitalWrite(PIN_RELE, HIGH);
+    bombaAtiva = true;
+    fimBomba = millis() + duracaoBomba;
+    Serial.printf("💧 BOMBA LIGADA — %s | R$%.2f | %us\n", id.c_str(), valor, tempoBombaSeg);
+  }
+
+  ultimaEntregaTs = agoraUTC();
+  entregasDia++;
+  freioSalvar();
+
+  Firebase.RTDB.setBool(&fbdo, base() + "/status/bomba_ativa", true);
+  bool okEntrega = registrarEntrega(id, valor, origem, dataPag);          // (2) livro de entregas
+  bool okTransacao = registrar(id, valor, "liberado", origem, motivo, atrasoMin, dataPag, por);
+  if (!okEntrega || !okTransacao)
+    guardarPendente(id, valor, origem, motivo, atrasoMin, dataPag, por, !okEntrega, !okTransacao);
+  logESP("info", "Bomba ligada — " + id + " (" + motivo + ")");
+}
+
+void desligarBomba(const String &motivo) {
+  digitalWrite(PIN_RELE, LOW);
+  bombaAtiva = false;
+  if (firebaseUtilizavel()) Firebase.RTDB.setBool(&fbdo, base() + "/status/bomba_ativa", false);
+  Serial.printf("💧 BOMBA DESLIGADA — %s\n", motivo.c_str());
+  logESP("info", "Bomba desligada — " + motivo);
+}
+
+// ==================================================
+// ↩️ FILA DE ESTORNOS
+// ==================================================
+bool agendarEstorno(const String &id, float valor, const String &origem, const String &motivo,
+                    long atrasoMin, time_t dataPag) {
+  FirebaseJson f;
+  f.set("motivo", motivo);
+  f.set("tentativas", 0);
+  f.set("proxima_tentativa", 0);
+  f.set("criado_em", (int)agoraUTC());
+  if (!Firebase.RTDB.setJSON(&fbdo, base() + "/fila_estornos/" + id, &f)) {
+    Serial.printf("⚠️ Não consegui colocar %s na fila de estorno — tento de novo\n", id.c_str());
+    return false;
+  }
+  registrar(id, valor, "estorno_pendente", origem, motivo, atrasoMin, dataPag);
+  estornosHora++;
+  estornosDia++;
+  freioSalvar();
+  filaUrgente = true;
+  return true;
+}
+
+// Decide entre estorno automático, simulação e decisão manual
+void encaminharEstorno(const String &id, float valor, const String &origem, const String &motivo,
+                       long atrasoMin, time_t dataPag) {
+  // (8) modo simulação: só anota o que faria
+  if (modoSimulacao) {
+    registrar(id, valor, "estorno_simulado", origem, motivo, atrasoMin, dataPag);
+    logESP("warn", "SIMULAÇÃO: teria estornado " + id + " (" + motivo + ") — nada foi devolvido");
+    return;
+  }
+  // (7) freio
+  String trava = freioBloqueia(agoraUTC());
+  if (trava == "pausa") {
+    Serial.printf("⏸️ %s adiado: entrega recente (pausa de %us)\n", id.c_str(), pausaAposEntrega);
+    return;   // nada é gravado: volta a ser avaliado na próxima consulta
+  }
+  if (trava.length()) {
+    ativarFreio(trava);
+    registrar(id, valor, "aguardando_autorizacao", origem, motivo, atrasoMin, dataPag);
+    logESP("warn", "Estorno de " + id + " enviado para decisão manual — freio: " + trava);
+    return;
+  }
+  agendarEstorno(id, valor, origem, motivo, atrasoMin, dataPag);
+}
+
+void concluirEstorno(const String &id, const String &motivo, float valor, const String &refundId,
+                     int tentativas, const String &obs) {
+  FirebaseJson j;
+  j.set("id", id);
+  j.set("status", "estornado");
+  j.set("motivo_estorno", motivo);
+  j.set("estornado_em", (int)agoraUTC());
+  j.set("valor_estornado", valor);
+  j.set("tentativas", tentativas);
+  j.set("ultimo_erro", "");
+  if (refundId.length()) j.set("refund_id", refundId);
+  if (obs.length()) j.set("obs", obs);
+
+  if (Firebase.RTDB.updateNode(&fbdo, base() + "/transacoes/" + id, &j)) {
+    Firebase.RTDB.deleteNode(&fbdo, base() + "/fila_estornos/" + id);
+    lembrarId(id);
+    logESP("info", "Estorno concluído — " + id + " (" + motivo + ")" + (obs.length() ? " — " + obs : ""));
+  }
+}
+
+void falhaDefinitivaEstorno(const String &id, const String &motivo, int tentativas, const String &erro) {
+  FirebaseJson j;
+  j.set("status", "estorno_falhou");
+  j.set("motivo_estorno", motivo);
+  j.set("tentativas", tentativas);
+  j.set("ultimo_erro", resumo(erro, 200));
+  Firebase.RTDB.updateNode(&fbdo, base() + "/transacoes/" + id, &j);
+  Firebase.RTDB.deleteNode(&fbdo, base() + "/fila_estornos/" + id);
+  logESP("error", "Estorno falhou definitivamente — " + id + " — " + resumo(erro, 120) +
+                  " (dá para tentar de novo pelo painel)");
+}
+
+void reagendarEstorno(const String &id, const String &motivo, int tentativas, const String &erro) {
+  int proxima = tentativas + 1;
+  if (proxima >= MAX_TENTATIVAS_ESTORNO) { falhaDefinitivaEstorno(id, motivo, proxima, erro); return; }
+  time_t quando = agoraUTC() + (time_t)ESPERA_TENTATIVA_SEG[proxima];
+
+  FirebaseJson f;
+  f.set("tentativas", proxima);
+  f.set("proxima_tentativa", (int)quando);
+  f.set("ultimo_erro", resumo(erro, 200));
+  Firebase.RTDB.updateNode(&fbdo, base() + "/fila_estornos/" + id, &f);
+
+  FirebaseJson t;
+  t.set("status", "estorno_pendente");
+  t.set("motivo_estorno", motivo);
+  t.set("tentativas", proxima);
+  t.set("ultimo_erro", resumo(erro, 200));
+  Firebase.RTDB.updateNode(&fbdo, base() + "/transacoes/" + id, &t);
+
+  Serial.printf("⏳ Estorno de %s adiado (tentativa %d) — %s\n", id.c_str(), proxima, erro.c_str());
+}
+
+void tentarEstorno(const String &id) {
+  if (!Firebase.RTDB.getJSON(&fbdo, base() + "/fila_estornos/" + id)) return;
+  FirebaseJson &f = fbdo.to<FirebaseJson>();
+  FirebaseJsonData d;
+  String motivo = "autorizado_usuario";
+  int tentativas = 0;
+  long proxima = 0;
+  if (f.get(d, "motivo") && d.success) motivo = d.stringValue;
+  if (f.get(d, "tentativas") && d.success) tentativas = d.stringValue.toInt();
+  if (f.get(d, "proxima_tentativa") && d.success) proxima = d.stringValue.toInt();
+
+  time_t agora = agoraUTC();
+  if (proxima > 0 && agora < (time_t)proxima) return;
+
+  // (5) trava de segurança antes de cada tentativa
+  String porque = "";
+  int liberado = podeEstornar(id, porque);
+  if (liberado == 0) {
+    Firebase.RTDB.deleteNode(&fbdo, base() + "/fila_estornos/" + id);
+    logESP("warn", "Estorno cancelado — " + id + ": " + porque);
+    return;
+  }
+  if (liberado < 0) return;   // não sei: tenta no próximo ciclo
+
+  String statusMP = "", erro = "";
+  float valorMP = 0;
+  int cod = consultarPagamentoMP(id, statusMP, valorMP, erro);
+  alimentarWDT();
+
+  if (cod == 200 && erro.length() == 0) {
+    if (statusMP == "refunded") { concluirEstorno(id, motivo, valorMP, "", tentativas, "ja constava estornado no Mercado Pago"); return; }
+    if (statusMP != "approved") { falhaDefinitivaEstorno(id, motivo, tentativas, "pagamento esta '" + statusMP + "' no Mercado Pago"); return; }
+  } else {
+    reagendarEstorno(id, motivo, tentativas, "consulta ao Mercado Pago falhou (HTTP " + String(cod) + ") " + erro);
+    return;
+  }
+
+  String refundId = "", erroPost = "";
+  int codPost = pedirEstornoMP(id, tentativas, refundId, erroPost);
+  alimentarWDT();
+
+  if (codPost == 200 || codPost == 201) concluirEstorno(id, motivo, valorMP, refundId, tentativas + 1, "");
+  else {
+    logAPI("refunds", codPost, erroPost);
+    reagendarEstorno(id, motivo, tentativas, "HTTP " + String(codPost) + ": " + erroPost);
+  }
+}
+
+void processarFilaEstornos() {
+  if (!Firebase.RTDB.getShallowData(&fbdo, base() + "/fila_estornos")) return;
+  if (fbdo.dataType() != "json") return;
+
+  String ids[4];
+  int n = 0;
+  FirebaseJson &j = fbdo.to<FirebaseJson>();
+  size_t total = j.iteratorBegin();
+  String chave, valor;
+  int tipo;
+  for (size_t i = 0; i < total && n < 4; i++) {
+    j.iteratorGet(i, tipo, chave, valor);
+    if (chave.length()) ids[n++] = chave;
+  }
+  j.iteratorEnd();
+
+  for (int i = 0; i < n; i++) { alimentarWDT(); tentarEstorno(ids[i]); }
+}
+
+// ==================================================
+// 💳 CRÉDITOS DO CLIENTE (carteira pré-paga)
+//  O saldo só é escrito aqui, pela máquina. O aplicativo
+//  do cliente apenas pede: recarga ou liberação de água.
+// ==================================================
+// O cliente pode gastar créditos nesta máquina?
+// "" = pode | outro texto = motivo da recusa
+String postoDoCliente(const String &uid) {
+  if (!creditosPorPosto) return "";
+  if (!Firebase.RTDB.getString(&fbdo, "/clientes/" + uid + "/posto")) {
+    if (caminhoInexistente()) return "";          // cliente antigo, sem posto: libera
+    return "erro";                                 // nao consegui ler: tenta depois
+  }
+  String posto = fbdo.stringData();
+  posto.replace("\"", "");
+  if (posto.length() == 0 || posto == "null" || posto == MAQUINA_ID) return "";
+  return "creditos deste cliente valem no posto " + posto;
+}
+
+bool mexerNoSaldo(const String &uid, float valor, const String &origem, const String &ref) {
+  if (uid.length() < 5 || fabs(valor) < 0.0001) return false;
+
+  float saldo = 0;
+  if (Firebase.RTDB.getFloat(&fbdo, "/clientes/" + uid + "/saldo")) saldo = fbdo.floatData();
+  else if (!caminhoInexistente()) return false;          // não sei o saldo: tenta depois
+  float novo = saldo + valor;
+  if (novo < 0) novo = 0;
+
+  FirebaseJson c;
+  c.set("saldo", novo);
+  c.set("atualizado_em", (int)agoraUTC());
+  if (!Firebase.RTDB.updateNode(&fbdo, "/clientes/" + uid, &c)) return false;
+
+  FirebaseJson e;
+  e.set("tipo", valor > 0 ? "recarga" : "consumo");
+  e.set("valor", valor);
+  e.set("saldo_depois", novo);
+  e.set("em", (int)agoraUTC());
+  e.set("origem", origem);
+  e.set("maquina", MAQUINA_ID);
+  if (ref.length()) e.set("referencia", ref);
+  Firebase.RTDB.pushJSON(&fbdo, "/clientes/" + uid + "/extrato", &e);
+  Serial.printf("💳 Saldo de %s: %.2f -> %.2f (%s)\n", uid.c_str(), saldo, novo, origem.c_str());
+  return true;
+}
+
+// 🎁 Bonificação: devolve uma porcentagem de cada consumo como cashback
+void creditarCashback(const String &uid, float valorConsumido) {
+  if (!cashbackAtivo || cashbackPercent <= 0 || valorConsumido <= 0) return;
+  float bonus = roundf(valorConsumido * cashbackPercent) / 100.0;
+  if (bonus < 0.01) return;
+
+  float atual = 0;
+  if (Firebase.RTDB.getFloat(&fbdo, "/clientes/" + uid + "/cashback")) atual = fbdo.floatData();
+  else if (!caminhoInexistente()) return;
+
+  FirebaseJson c;
+  c.set("cashback", atual + bonus);
+  c.set("atualizado_em", (int)agoraUTC());
+  if (!Firebase.RTDB.updateNode(&fbdo, "/clientes/" + uid, &c)) return;
+
+  FirebaseJson e;
+  e.set("tipo", "cashback");
+  e.set("valor", bonus);
+  e.set("saldo_depois", atual + bonus);
+  e.set("em", (int)agoraUTC());
+  e.set("origem", "bonificacao");
+  e.set("maquina", MAQUINA_ID);
+  Firebase.RTDB.pushJSON(&fbdo, "/clientes/" + uid + "/extrato", &e);
+  Serial.printf("🎁 Cashback de R$%.2f para %s\n", bonus, uid.c_str());
+}
+
+// Cliente pediu para transformar o cashback em créditos
+void resgatarCashback(const String &id) {
+  String caminho = "/resgates/" + id;
+  if (!Firebase.RTDB.getJSON(&fbdo, caminho)) {
+    if (caminhoInexistente()) Firebase.RTDB.deleteNode(&fbdo, "/fila_resgates/" + id);
+    return;
+  }
+  FirebaseJson &r = fbdo.to<FirebaseJson>();
+  FirebaseJsonData d;
+  String status = "", uid = "";
+  if (r.get(d, "status") && d.success) status = d.stringValue;
+  if (r.get(d, "uid") && d.success) uid = d.stringValue;
+  if (status != "solicitado" || uid.length() < 5) { Firebase.RTDB.deleteNode(&fbdo, "/fila_resgates/" + id); return; }
+
+  float cash = 0, saldo = 0;
+  if (Firebase.RTDB.getFloat(&fbdo, "/clientes/" + uid + "/cashback")) cash = fbdo.floatData();
+  else if (!caminhoInexistente()) return;
+  if (Firebase.RTDB.getFloat(&fbdo, "/clientes/" + uid + "/saldo")) saldo = fbdo.floatData();
+  else if (!caminhoInexistente()) return;
+
+  FirebaseJson up;
+  if (!cashbackAtivo) { up.set("status", "recusado"); up.set("motivo", "programa de bonificacao desligado"); }
+  else if (cash < cashbackMinimo || cash < 0.01) {
+    up.set("status", "recusado");
+    up.set("motivo", "o minimo para resgate e R$" + String(cashbackMinimo, 2));
+    up.set("cashback", cash);
+  } else {
+    FirebaseJson c;
+    c.set("saldo", saldo + cash);
+    c.set("cashback", 0);
+    c.set("atualizado_em", (int)agoraUTC());
+    if (!Firebase.RTDB.updateNode(&fbdo, "/clientes/" + uid, &c)) return;
+
+    FirebaseJson e;
+    e.set("tipo", "resgate");
+    e.set("valor", cash);
+    e.set("saldo_depois", saldo + cash);
+    e.set("em", (int)agoraUTC());
+    e.set("origem", "resgate_de_cashback");
+    e.set("maquina", MAQUINA_ID);
+    Firebase.RTDB.pushJSON(&fbdo, "/clientes/" + uid + "/extrato", &e);
+
+    up.set("status", "concluido");
+    up.set("valor", cash);
+    up.set("concluido_em", (int)agoraUTC());
+    logESP("info", "Cashback resgatado — R$" + String(cash, 2) + " viraram creditos para " + uid);
+  }
+  Firebase.RTDB.updateNode(&fbdo, caminho, &up);
+  Firebase.RTDB.deleteNode(&fbdo, "/fila_resgates/" + id);
+}
+
+void processarResgates() {
+  if (!Firebase.RTDB.getShallowData(&fbdo, "/fila_resgates")) return;
+  if (fbdo.dataType() != "json") return;
+  String ids[MAX_POR_CICLO];
+  int n = 0;
+  FirebaseJson &j = fbdo.to<FirebaseJson>();
+  size_t total = j.iteratorBegin();
+  String chave, valor;
+  int tipo;
+  for (size_t i = 0; i < total && n < MAX_POR_CICLO; i++) { j.iteratorGet(i, tipo, chave, valor); if (chave.length()) ids[n++] = chave; }
+  j.iteratorEnd();
+  for (int i = 0; i < n; i++) { alimentarWDT(); resgatarCashback(ids[i]); }
+}
+
+// PIX de recarga aprovado: credita o cliente (identificado pelo external_reference)
+void confirmarRecarga(const String &pagamentoId, float valor, const String &ref) {
+  int sep = ref.indexOf('|');
+  if (sep <= 0) return;
+  String uid = ref.substring(0, sep), recargaId = ref.substring(sep + 1);
+  String caminho = "/recargas/" + recargaId;
+
+  String status = "";
+  if (Firebase.RTDB.getString(&fbdo, caminho + "/status")) { status = fbdo.stringData(); status.replace("\"", ""); }
+  else if (!caminhoInexistente()) return;
+  if (status == "paga") { lembrarId(pagamentoId); return; }     // já creditado
+
+  if (!mexerNoSaldo(uid, valor, "recarga", pagamentoId)) return;
+
+  FirebaseJson r;
+  r.set("status", "paga");
+  r.set("pago_em", (int)agoraUTC());
+  r.set("valor_pago", valor);
+  r.set("pagamento_id", pagamentoId);
+  Firebase.RTDB.updateNode(&fbdo, caminho, &r);
+  lembrarId(pagamentoId);
+  logESP("info", "Recarga confirmada — R$" + String(valor, 2) + " creditados para " + uid);
+}
+
+// Cria a cobrança PIX no Mercado Pago para uma recarga pedida no aplicativo
+void criarCobrancaPix(const String &recargaId) {
+  String caminho = "/recargas/" + recargaId;
+  if (!Firebase.RTDB.getJSON(&fbdo, caminho)) {
+    if (caminhoInexistente()) Firebase.RTDB.deleteNode(&fbdo, "/fila_recargas/" + recargaId);
+    return;
+  }
+  FirebaseJson &r = fbdo.to<FirebaseJson>();
+  FirebaseJsonData d;
+  String status = "", uid = "", email = "", maquinaPedido = "";
+  float valor = 0;
+  long criadoEm = 0;
+  if (r.get(d, "status") && d.success) status = d.stringValue;
+  if (r.get(d, "uid") && d.success) uid = d.stringValue;
+  if (r.get(d, "email") && d.success) email = d.stringValue;
+  if (r.get(d, "valor") && d.success) valor = d.stringValue.toFloat();
+  if (r.get(d, "maquina") && d.success) maquinaPedido = d.stringValue;
+  if (r.get(d, "criado_em") && d.success) criadoEm = d.stringValue.toInt();
+
+  if (status != "solicitada") { Firebase.RTDB.deleteNode(&fbdo, "/fila_recargas/" + recargaId); return; }
+
+  // O dinheiro cai na conta do Mercado Pago desta máquina. Se o cliente pediu a
+  // recarga em outra máquina, deixa para ela. Se ninguém pegar em 2 minutos
+  // (a outra pode estar offline), esta assume, para o cliente não ficar parado.
+  if (maquinaPedido.length() && maquinaPedido != MAQUINA_ID) {
+    time_t agora = agoraUTC();
+    if (!criadoEm || (agora && agora - criadoEm < 120)) return;
+    Serial.printf("💳 Assumindo a recarga %s (pedida em '%s', que nao respondeu)\n",
+                  recargaId.c_str(), maquinaPedido.c_str());
+  }
+
+  FirebaseJson up;
+  if (valor < RECARGA_MIN || valor > RECARGA_MAX || uid.length() < 5 || email.indexOf('@') < 0) {
+    up.set("status", "erro");
+    up.set("erro", "dados da recarga invalidos");
+    Firebase.RTDB.updateNode(&fbdo, caminho, &up);
+    Firebase.RTDB.deleteNode(&fbdo, "/fila_recargas/" + recargaId);
+    return;
+  }
+
+  String corpo = "{\"transaction_amount\":" + String(valor, 2) +
+                 ",\"description\":\"Creditos " + String(MAQUINA_NOME) + "\"" +
+                 ",\"payment_method_id\":\"pix\"" +
+                 ",\"external_reference\":\"" + uid + "|" + recargaId + "\"" +
+                 ",\"payer\":{\"email\":\"" + email + "\"}}";
+
+  StaticJsonDocument<256> filtro;
+  filtro["id"] = true;
+  filtro["status"] = true;
+  filtro["point_of_interaction"]["transaction_data"]["qr_code"] = true;
+  filtro["point_of_interaction"]["transaction_data"]["ticket_url"] = true;
+  DynamicJsonDocument doc(2048);
+  String erro;
+  int cod = mpPost("https://api.mercadopago.com/v1/payments", corpo, "recarga-" + recargaId, doc, filtro, erro);
+
+  if ((cod == 200 || cod == 201) && erro.length() == 0) {
+    String pid = doc["id"].as<String>();
+    String qr = doc["point_of_interaction"]["transaction_data"]["qr_code"] | "";
+    String link = doc["point_of_interaction"]["transaction_data"]["ticket_url"] | "";
+    up.set("status", qr.length() ? "aguardando_pagamento" : "erro");
+    up.set("pagamento_id", pid);
+    up.set("qr_code", qr);
+    up.set("link", link);
+    up.set("cobranca_em", (int)agoraUTC());
+    if (!qr.length()) up.set("erro", "o Mercado Pago nao devolveu o codigo PIX");
+    else Serial.printf("💳 Cobranca PIX criada: R$%.2f (recarga %s)\n", valor, recargaId.c_str());
+  } else {
+    up.set("status", "erro");
+    up.set("erro", resumo(erro, 160));
+    logAPI("payments", cod, erro);
+  }
+  Firebase.RTDB.updateNode(&fbdo, caminho, &up);
+  Firebase.RTDB.deleteNode(&fbdo, "/fila_recargas/" + recargaId);
+}
+
+void processarRecargas() {
+  if (!Firebase.RTDB.getShallowData(&fbdo, "/fila_recargas")) return;
+  if (fbdo.dataType() != "json") return;
+  String ids[MAX_POR_CICLO];
+  int n = 0;
+  FirebaseJson &j = fbdo.to<FirebaseJson>();
+  size_t total = j.iteratorBegin();
+  String chave, valor;
+  int tipo;
+  for (size_t i = 0; i < total && n < MAX_POR_CICLO; i++) { j.iteratorGet(i, tipo, chave, valor); if (chave.length()) ids[n++] = chave; }
+  j.iteratorEnd();
+  for (int i = 0; i < n; i++) { alimentarWDT(); criarCobrancaPix(ids[i]); }
+}
+
+// Pedido de água feito pelo aplicativo, pago com saldo
+void atenderPedido(const String &pedidoId) {
+  String caminho = base() + "/pedidos/" + pedidoId;
+  if (!Firebase.RTDB.getJSON(&fbdo, caminho)) return;
+  FirebaseJson &p = fbdo.to<FirebaseJson>();
+  FirebaseJsonData d;
+  String status = "", uid = "";
+  long criado = 0;
+  if (p.get(d, "status") && d.success) status = d.stringValue;
+  if (p.get(d, "uid") && d.success) uid = d.stringValue;
+  if (p.get(d, "criado_em") && d.success) criado = d.stringValue.toInt();
+  if (status != "novo") return;
+
+  time_t agora = agoraUTC();
+  FirebaseJson up;
+
+  if (criado && agora - criado > VALIDADE_PEDIDO_SEG) {
+    up.set("status", "expirado");
+    up.set("motivo", "o pedido demorou demais");
+    Firebase.RTDB.updateNode(&fbdo, caminho, &up);
+    return;
+  }
+  if (!sistemaLigado) {
+    up.set("status", "recusado"); up.set("motivo", "o sistema está pausado");
+    Firebase.RTDB.updateNode(&fbdo, caminho, &up);
+    return;
+  }
+  if (valorEsperado <= 0) {
+    up.set("status", "recusado"); up.set("motivo", "valor da água não configurado");
+    Firebase.RTDB.updateNode(&fbdo, caminho, &up);
+    return;
+  }
+  if (bombaAtiva) return;     // espera a bomba terminar o ciclo atual
+
+  String barreira = postoDoCliente(uid);
+  if (barreira == "erro") return;
+  if (barreira.length()) {
+    up.set("status", "recusado");
+    up.set("motivo", barreira);
+    Firebase.RTDB.updateNode(&fbdo, caminho, &up);
+    return;
+  }
+
+  float saldo = 0;
+  if (Firebase.RTDB.getFloat(&fbdo, "/clientes/" + uid + "/saldo")) saldo = fbdo.floatData();
+  else if (!caminhoInexistente()) return;
+
+  if (saldo + 0.0001 < valorEsperado) {
+    up.set("status", "recusado");
+    up.set("motivo", "saldo insuficiente");
+    up.set("saldo", saldo);
+    up.set("valor", valorEsperado);
+    Firebase.RTDB.updateNode(&fbdo, caminho, &up);
+    return;
+  }
+
+  if (!mexerNoSaldo(uid, -valorEsperado, "consumo", pedidoId)) return;   // desconta antes de soltar água
+  creditarCashback(uid, valorEsperado);
+
+  up.set("status", "liberado");
+  up.set("atendido_em", (int)agora);
+  up.set("valor", valorEsperado);
+  up.set("saldo_depois", saldo - valorEsperado);
+  Firebase.RTDB.updateNode(&fbdo, caminho, &up);
+  ligarBomba("credito_" + pedidoId, valorEsperado, "credito", "saldo_do_cliente", 0, 0, uid);
+}
+
+void processarPedidos() {
+  if (!Firebase.RTDB.getShallowData(&fbdo, base() + "/pedidos")) return;
+  if (fbdo.dataType() != "json") return;
+  String ids[MAX_POR_CICLO];
+  int n = 0;
+  FirebaseJson &j = fbdo.to<FirebaseJson>();
+  size_t total = j.iteratorBegin();
+  String chave, valor;
+  int tipo;
+  for (size_t i = 0; i < total && n < MAX_POR_CICLO; i++) { j.iteratorGet(i, tipo, chave, valor); if (chave.length()) ids[n++] = chave; }
+  j.iteratorEnd();
+  for (int i = 0; i < n; i++) { alimentarWDT(); atenderPedido(ids[i]); }
+}
+
+// ==================================================
+// 🪪 CARTÃO RFID — encostou, identifica e libera
+// ==================================================
+void bip(int vezes, int duracao = 90) {
+#if PIN_BIP >= 0
+  for (int i = 0; i < vezes; i++) {
+    digitalWrite(PIN_BIP, HIGH); delay(duracao);
+    digitalWrite(PIN_BIP, LOW);  delay(70);
+  }
+#else
+  (void)vezes; (void)duracao;
+#endif
+}
+
+void anotarCartaoLido(const String &tag, const String &situacao, const String &detalhe) {
+  Serial.printf("🪪 Cartão %s — %s %s\n", tag.c_str(), situacao.c_str(), detalhe.c_str());
+  if (!firebaseUtilizavel()) return;
+  FirebaseJson j;
+  j.set("tag", tag);
+  j.set("situacao", situacao);          // liberado | sem_saldo | nao_cadastrado | bloqueado | sem_internet
+  j.set("detalhe", detalhe);
+  j.set("em", (int)agoraUTC());
+  Firebase.RTDB.updateNode(&fbdo, base() + "/ultimo_cartao", &j);
+}
+
+void processarCartao(const String &tag) {
+  if (bombaAtiva) { bip(1, 60); return; }                       // já está liberando
+
+  if (!prontoParaPagamentos()) {
+    bip(3);
+    anotarCartaoLido(tag, "sem_internet", "a maquina estava sem conexao");
+    return;
+  }
+
+  String caminho = "/cartoes/" + tag;
+  if (!Firebase.RTDB.getJSON(&fbdo, caminho)) {
+    if (caminhoInexistente()) {
+      bip(3);
+      anotarCartaoLido(tag, "nao_cadastrado", "cadastre este cartao no painel");
+      logESP("warn", "Cartão não cadastrado encostado no leitor: " + tag);
+    }
+    return;                                                     // erro de leitura: tenta na próxima
+  }
+
+  FirebaseJson &c = fbdo.to<FirebaseJson>();
+  FirebaseJsonData d;
+  String uidCliente = "", apelido = "";
+  bool ativo = true;
+  if (c.get(d, "uid_cliente") && d.success) uidCliente = d.stringValue;
+  if (c.get(d, "apelido") && d.success) apelido = d.stringValue;
+  if (c.get(d, "ativo") && d.success) ativo = (d.stringValue == "true" || d.stringValue == "1");
+
+  if (!ativo || uidCliente.length() < 5) {
+    bip(3);
+    anotarCartaoLido(tag, "bloqueado", apelido);
+    return;
+  }
+  if (!sistemaLigado) { bip(3); anotarCartaoLido(tag, "bloqueado", "sistema pausado"); return; }
+  if (valorEsperado <= 0) { bip(3); anotarCartaoLido(tag, "bloqueado", "valor da agua nao configurado"); return; }
+
+  String barreira = postoDoCliente(uidCliente);
+  if (barreira == "erro") return;
+  if (barreira.length()) { bip(3); anotarCartaoLido(tag, "bloqueado", barreira); return; }
+
+  float saldo = 0;
+  if (Firebase.RTDB.getFloat(&fbdo, "/clientes/" + uidCliente + "/saldo")) saldo = fbdo.floatData();
+  else if (!caminhoInexistente()) return;
+
+  if (saldo + 0.0001 < valorEsperado) {
+    bip(3);
+    anotarCartaoLido(tag, "sem_saldo", "saldo de R$" + String(saldo, 2));
+    return;
+  }
+
+  if (!mexerNoSaldo(uidCliente, -valorEsperado, "consumo_cartao", tag)) return;
+  creditarCashback(uidCliente, valorEsperado);
+
+  FirebaseJson u;
+  u.set("ultimo_uso", (int)agoraUTC());
+  u.set("ultima_maquina", MAQUINA_ID);
+  Firebase.RTDB.updateNode(&fbdo, caminho, &u);
+
+  anotarCartaoLido(tag, "liberado", apelido);
+  bip(1, 150);
+  ligarBomba("cartao_" + tag + "_" + String((int)agoraUTC()), valorEsperado, "cartao", "cartao_rfid", 0, 0, uidCliente);
+}
+
+void cuidarRFID() {
+#if RFID_ATIVO
+  if (!leitorRFID.PICC_IsNewCardPresent()) return;
+  if (!leitorRFID.PICC_ReadCardSerial()) return;
+
+  String tag = "";
+  for (byte i = 0; i < leitorRFID.uid.size; i++) {
+    if (leitorRFID.uid.uidByte[i] < 0x10) tag += "0";
+    tag += String(leitorRFID.uid.uidByte[i], HEX);
+  }
+  tag.toUpperCase();
+  leitorRFID.PICC_HaltA();
+  leitorRFID.PCD_StopCrypto1();
+
+  time_t agora = agoraUTC();
+  if (tag == ultimaTag && ultimaTagEm && agora - ultimaTagEm < RFID_REPETE_SEG) return;   // encostou de novo
+  ultimaTag = tag;
+  ultimaTagEm = agora;
+
+  alimentarWDT();
+  processarCartao(tag);
+  alimentarWDT();
+#endif
+}
+
+// ==================================================
+// ⚖️ DECISÃO DE CADA PIX
+// ==================================================
+void analisar(const String &id, float valor, time_t dataPag) {
+  if (statusConhecido(id) != 0) return;
+
+  time_t agora = agoraUTC();
+  if (dataPag == 0) {
+    registrar(id, valor, "ignorado_data_invalida", "", "data_invalida", -1, 0);
+    return;
+  }
+
+  long atrasoSeg = (long)(agora - dataPag);
+  if (atrasoSeg < 0) atrasoSeg = 0;
+  long atrasoMin = atrasoSeg / 60;
+
+  // A máquina estava realmente atendendo quando o PIX entrou?
+  // operacionalDesde marca o momento em que ela ficou online (no boot ou depois de uma queda).
+  bool maquinaAtendia = (operacionalDesde > 0 && dataPag >= operacionalDesde);
+  bool naHora = (maquinaAtendia || liberarAposVoltar) && (atrasoSeg <= (long)liberarAteSeg);
+  String origem = maquinaAtendia ? "online" : "offline";
+
+  // Sistema pausado
+  if (!sistemaLigado) {
+    if (estornoAutoPausado) encaminharEstorno(id, valor, origem, "sistema_pausado", atrasoMin, dataPag);
+    else registrar(id, valor, "aguardando_autorizacao", origem, "sistema_pausado", atrasoMin, dataPag);
+    return;
+  }
+
+  // Cliente ainda está na máquina
+  if (naHora) {
+    if (fabs(valor - valorEsperado) > 0.005) {
+      if (estornoAutoValor) encaminharEstorno(id, valor, origem, "valor_incorreto", atrasoMin, dataPag);
+      else registrar(id, valor, "aguardando_autorizacao", origem, "valor_incorreto", atrasoMin, dataPag);
+    } else {
+      ligarBomba(id, valor, origem, "valor_ok", atrasoMin, dataPag);
+    }
+    return;
+  }
+
+  // Pago com a máquina fora do ar
+  if (atrasoSeg <= (long)janelaEstornoMin * 60L) {
+    // (4) só devolve sozinha se a memória de entregas cobrir a data do pagamento
+    if (!coberturaDesde || dataPag < coberturaDesde) {
+      registrar(id, valor, "aguardando_autorizacao", origem, "sem_cobertura", atrasoMin, dataPag);
+      logESP("warn", "PIX " + id + " é anterior à memória de entregas (" + horaBR(coberturaDesde) +
+                     ") — não dá para garantir que não foi entregue. Aguardando sua decisão.");
+      return;
+    }
+    encaminharEstorno(id, valor, origem, "dentro_da_janela", atrasoMin, dataPag);
+  } else {
+    registrar(id, valor, "aguardando_autorizacao", origem, "fora_da_janela", atrasoMin, dataPag);
+    logESP("warn", "PIX " + id + " (R$" + String(valor, 2) + ") chegou " + String(atrasoMin) +
+                   " min atrasado — aguardando sua decisão no painel");
+  }
+}
+
+// ==================================================
+// 📡 CONSULTA AO MERCADO PAGO
+// ==================================================
+// Consulta uma "página" de pagamentos. Devolve quantos vieram, ou -1 em caso de erro.
+int consultarPaginaMP(int offset) {
+  String url = "https://api.mercadopago.com/v1/payments/search?sort=date_created&criteria=desc&status=approved"
+               "&limit=" + String(LIMITE_CONSULTA_MP) + "&offset=" + String(offset);
+
+  StaticJsonDocument<256> filtro;
+  filtro["results"][0]["id"] = true;
+  filtro["results"][0]["transaction_amount"] = true;
+  filtro["results"][0]["date_created"] = true;
+  filtro["results"][0]["status"] = true;
+  filtro["results"][0]["external_reference"] = true;
+
+  DynamicJsonDocument doc(TAMANHO_BUFFER_JSON);
+  String erro;
+  int cod = mpGet(url, doc, filtro, erro);
+  alimentarWDT();
+
+  if (cod != 200 || erro.length()) {
+    static unsigned long ultimoLog = 0;
+    Serial.printf("⚠️ Consulta ao MP falhou (HTTP %d): %s\n", cod, erro.c_str());
+    if (millis() - ultimoLog > 60000UL) { ultimoLog = millis(); logAPI("payments/search", cod, erro); }
+    return -1;
+  }
+
+  JsonArray lista = doc["results"];
+  if (!lista) return 0;
+  int n = lista.size();
+  for (JsonObject pgto : lista) {
+    alimentarWDT();
+    String id = pgto["id"].as<String>();
+    float valor = pgto["transaction_amount"] | 0.0f;
+    String dataStr = pgto["date_created"].as<String>();
+    String ref = pgto["external_reference"] | "";
+
+    if (ref.indexOf('|') > 0) {          // é recarga de crédito, não compra de água
+      if (!idNaMemoria(id)) confirmarRecarga(id, valor, ref);
+    } else {
+      analisar(id, valor, parseData(dataStr.c_str()));
+    }
+    delay(20);
+  }
+  return n;
+}
+
+void verificarMP() {
+  // Consulta normal: só a primeira página. Depois de uma queda: algumas páginas,
+  // uma de cada vez, para não encher a memória com respostas grandes.
+  int paginas = precisaVarredura ? (LIMITE_VARREDURA_MP / LIMITE_CONSULTA_MP) : 1;
+  int total = 0;
+  for (int p = 0; p < paginas; p++) {
+    int n = consultarPaginaMP(p * LIMITE_CONSULTA_MP);
+    if (n < 0) return;                     // falhou: tenta tudo de novo no próximo ciclo
+    total += n;
+    if (n < LIMITE_CONSULTA_MP) break;     // acabaram os pagamentos
+    alimentarWDT();
+    delay(50);
+  }
+  if (precisaVarredura) {
+    precisaVarredura = false;
+    Serial.printf("🔎 Varredura concluída: %d pagamentos conferidos\n", total);
+  }
+}
+
+// ==================================================
+// ⚙️ CONFIGURAÇÃO E STATUS
+// ==================================================
+void lerConfig() {
+  if (!Firebase.RTDB.getJSON(&fbdo, base() + "/config")) {
+    if (caminhoInexistente()) configCarregada = true;
+    return;
+  }
+  FirebaseJson &c = fbdo.to<FirebaseJson>();
+  FirebaseJsonData d;
+  auto verdadeiro = [](const String &v) { return v == "true" || v == "1"; };
+
+  if (c.get(d, "ligado") && d.success)  sistemaLigado = verdadeiro(d.stringValue);
+  if (c.get(d, "valor") && d.success)   valorEsperado = d.stringValue.toFloat();
+  if (c.get(d, "tempo_bomba_seg") && d.success) {
+    int t = constrain(d.stringValue.toInt(), 5, 300);
+    tempoBombaSeg = (unsigned int)t;
+    duracaoBomba = (unsigned long)t * 1000UL;
+  }
+  if (c.get(d, "janela_estorno_min") && d.success) janelaEstornoMin = (unsigned int)constrain(d.stringValue.toInt(), 1, 240);
+  if (c.get(d, "liberar_ate_seg") && d.success)    liberarAteSeg = (unsigned int)constrain(d.stringValue.toInt(), 30, 900);
+  if (c.get(d, "estorno_auto_valor_incorreto") && d.success) estornoAutoValor = verdadeiro(d.stringValue);
+  if (c.get(d, "estorno_auto_sistema_pausado") && d.success) estornoAutoPausado = verdadeiro(d.stringValue);
+  if (c.get(d, "liberar_apos_voltar") && d.success) liberarAposVoltar = verdadeiro(d.stringValue);
+  if (c.get(d, "modo_simulacao") && d.success) modoSimulacao = verdadeiro(d.stringValue);
+  if (c.get(d, "max_estornos_hora") && d.success) maxEstornosHora = (unsigned int)constrain(d.stringValue.toInt(), 1, 100);
+  if (c.get(d, "max_estornos_dia") && d.success)  maxEstornosDia = (unsigned int)constrain(d.stringValue.toInt(), 1, 500);
+  if (c.get(d, "pausa_apos_entrega_seg") && d.success) pausaAposEntrega = (unsigned int)constrain(d.stringValue.toInt(), 0, 600);
+  if (c.get(d, "percentual_max_estorno") && d.success) percentualMax = (unsigned int)constrain(d.stringValue.toInt(), 5, 100);
+
+  configCarregada = true;
+
+  // Programa de bonificação (é global, vale para todas as máquinas)
+  if (Firebase.RTDB.getJSON(&fbdo, "/config_global/cashback")) {
+    FirebaseJson &cb = fbdo.to<FirebaseJson>();
+    FirebaseJsonData k;
+    if (cb.get(k, "ativo") && k.success) cashbackAtivo = (k.stringValue == "true" || k.stringValue == "1");
+    if (cb.get(k, "percentual") && k.success) cashbackPercent = constrain(k.stringValue.toFloat(), 0.0f, 50.0f);
+    if (cb.get(k, "minimo_resgate") && k.success) cashbackMinimo = constrain(k.stringValue.toFloat(), 1.0f, 500.0f);
+  }
+  if (Firebase.RTDB.getBool(&fbdo, "/config_global/creditos_por_posto")) creditosPorPosto = fbdo.boolData();
+
+  if (fabs(valorEsperado - valorAnterior) > 0.001 || tempoBombaSeg != tempoAnterior) {
+    Serial.println("==========================================");
+    Serial.println("✅ CONFIGURAÇÃO APLICADA (enviada pelo painel)");
+    Serial.printf("   💰 Valor do PIX:   R$%.2f\n", valorEsperado);
+    Serial.printf("   ⏱️  Tempo da bomba: %us\n", tempoBombaSeg);
+    Serial.printf("   ↩️  Janela: %umin | libera até %us | simulação: %s\n",
+                  janelaEstornoMin, liberarAteSeg, modoSimulacao ? "LIGADA" : "desligada");
+    Serial.println("==========================================");
+    valorAnterior = valorEsperado;
+    tempoAnterior = tempoBombaSeg;
+  }
+}
+
+void enviarHeartbeat(unsigned long agoraMs) {
+  static unsigned long ultimoHeap = 0;
+  FirebaseJson st;
+  st.set("online", true);
+  st.set("bomba_ativa", bombaAtiva);
+  st.set("versao", FW_VERSAO);
+  st.set("tempo_bomba_aplicado", (int)tempoBombaSeg);
+  st.set("janela_estorno_aplicada", (int)janelaEstornoMin);
+  st.set("liberar_ate_aplicado", (int)liberarAteSeg);
+  st.set("modo_simulacao_aplicado", modoSimulacao);
+  st.set("freio_ativo", freioAtivo);
+  st.set("freio_motivo", freioMotivo);
+  st.set("estornos_hora", (int)estornosHora);
+  st.set("estornos_dia", (int)estornosDia);
+  st.set("entregas_dia", (int)entregasDia);
+  st.set("cobertura_desde", (int)coberturaDesde);
+  st.set("operacional_desde", (int)operacionalDesde);
+  st.set("liberar_apos_voltar_aplicado", liberarAposVoltar);
+  st.set("rssi", (int)WiFi.RSSI());
+  st.set("ip", WiFi.localIP().toString());
+  if (horarioSincronizado) st.set("ultimo_heartbeat", (int)time(nullptr));
+
+  if (ultimoHeap == 0 || agoraMs - ultimoHeap > 60000UL) {
+    ultimoHeap = agoraMs;
+    st.set("heap_livre", (int)ESP.getFreeHeap());
+    st.set("heap_bloco_max", (int)ESP.getMaxAllocHeap());
+    st.set("uptime_seg", (int)(agoraMs / 1000UL));
+  }
+
+  if (Firebase.RTDB.updateNode(&fbdo, base() + "/status", &st)) {
+    ultimoFirebaseOk = millis();
+    wifiRefeitoInternet = false;
+    encerrarQueda();
+    publicarEventoBoot();
+  }
+}
+
+void lerComandos() {
+  if (!Firebase.RTDB.getJSON(&fbdo, base() + "/comandos")) return;
+  FirebaseJson &c = fbdo.to<FirebaseJson>();
+  FirebaseJsonData d;
+  bool ligar = false, desligar = false, soltar = false;
+  String por = "", quemFreio = "";
+  if (c.get(d, "ligar_bomba") && d.success) ligar = (d.stringValue == "true");
+  if (c.get(d, "desligar_bomba") && d.success) desligar = (d.stringValue == "true");
+  if (c.get(d, "reativar_freio") && d.success) soltar = (d.stringValue == "true");
+  if (c.get(d, "ligar_bomba_por") && d.success) por = d.stringValue;
+  if (c.get(d, "reativar_freio_por") && d.success) quemFreio = d.stringValue;
+
+  if (ligar) {
+    FirebaseJson r; r.set("ligar_bomba", false);
+    Firebase.RTDB.updateNode(&fbdo, base() + "/comandos", &r);
+    if (!bombaAtiva) ligarBomba("manual_" + String((int)agoraUTC()), 0, "manual_dash", "manual", -1, 0, por);
+  }
+  if (desligar) {
+    FirebaseJson r; r.set("desligar_bomba", false);
+    Firebase.RTDB.updateNode(&fbdo, base() + "/comandos", &r);
+    if (bombaAtiva) desligarBomba("comando manual pelo painel");
+  }
+  if (soltar) {
+    FirebaseJson r; r.set("reativar_freio", false);
+    Firebase.RTDB.updateNode(&fbdo, base() + "/comandos", &r);
+    soltarFreio(quemFreio);
+  }
+}
+
+// ==================================================
+// 🛠️ OTA
+// ==================================================
+void verificarOTA() {
+  if (!Firebase.RTDB.getJSON(&fbdo, base() + "/developer")) return;
+  FirebaseJson &dev = fbdo.to<FirebaseJson>();
+  FirebaseJsonData d;
+  bool pedido = false;
+  String url = "";
+  if (dev.get(d, "atualizar") && d.success) pedido = (d.stringValue == "true");
+  if (dev.get(d, "firmware_url") && d.success) url = d.stringValue;
+  if (!pedido) return;
+
+  if (url.length() < 8) {
+    Firebase.RTDB.setBool(&fbdo, base() + "/developer/atualizar", false);
+    Firebase.RTDB.setString(&fbdo, base() + "/developer/status", "erro: URL do firmware vazia");
+    return;
+  }
+
+  Serial.printf("🛠️ [OTA] Atualizando a partir de %s\n", url.c_str());
+  Firebase.RTDB.setBool(&fbdo, base() + "/developer/atualizar", false);
+  Firebase.RTDB.setString(&fbdo, base() + "/developer/status", "baixando");
+  logESP("info", "OTA iniciado pelo painel — " + url);
+  alimentarWDT();
+
+  WiFiClientSecure clienteOTA;
+  clienteOTA.setInsecure();
+  clienteOTA.setTimeout(30);
+  httpUpdate.rebootOnUpdate(false);
+  httpUpdate.onProgress([](int atual, int total) { esp_task_wdt_reset(); });
+  t_httpUpdate_return resultado = httpUpdate.update(clienteOTA, url);
+  alimentarWDT();
+
+  switch (resultado) {
+    case HTTP_UPDATE_FAILED:
+      Firebase.RTDB.setString(&fbdo, base() + "/developer/status", "erro: " + httpUpdate.getLastErrorString());
+      logESP("error", "OTA falhou — " + httpUpdate.getLastErrorString());
+      break;
+    case HTTP_UPDATE_NO_UPDATES:
+      Firebase.RTDB.setString(&fbdo, base() + "/developer/status", "sem novidade");
+      break;
+    case HTTP_UPDATE_OK:
+      Firebase.RTDB.setString(&fbdo, base() + "/developer/status", "sucesso - reiniciando");
+      Firebase.RTDB.setInt(&fbdo, base() + "/developer/ultima_atualizacao", (int)agoraUTC());
+      logESP("info", "OTA concluído — reiniciando");
+      delay(1500);
+      ESP.restart();
+      break;
+  }
+}
+
+// ==================================================
+// 📶 WI-FI E RELÓGIO
+// ==================================================
+bool cuidarWiFi() {
+  if (WiFi.status() == WL_CONNECTED) {
+    if (wifiCaiuEm) {
+      Serial.printf("📶 Wi-Fi reconectado após %lus (%d tentativas)\n", (millis() - wifiCaiuEm) / 1000UL, quedaTentativas);
+      wifiCaiuEm = 0;
+      radioReiniciado = false;
+      ultimoFirebaseOk = millis();
+      ultimoMPContato = millis();
+    }
+    return true;
+  }
+
+  unsigned long agora = millis();
+  if (!wifiCaiuEm) {
+    wifiCaiuEm = agora;
+    ultimaTentativaWiFi = agora;
+    iniciarQueda("Wi-Fi caiu: " + motivoWiFi(wifiMotivoCod));
+  }
+  unsigned long fora = agora - wifiCaiuEm;
+
+  unsigned long limite = (quedaReinicios == 0 ? WIFI_REINICIO_1_SEG : WIFI_REINICIO_N_SEG) * 1000UL;
+  if (!bombaAtiva && fora > limite) {
+    quedaReinicios++;
+    salvarQuedaNVS();
+    reiniciarSeguro("Wi-Fi fora do ar — reinicio automatico para reconectar");
+  }
+
+  if (!radioReiniciado && fora > WIFI_RESET_RADIO_SEG * 1000UL) {
+    Serial.println("📶 Reiniciando o rádio Wi-Fi...");
+    WiFi.disconnect(true);
+    WiFi.mode(WIFI_OFF);
+    delay(300);
+    WiFi.mode(WIFI_STA);
+    WiFi.setSleep(false);
+    WiFi.begin(WIFI_SSID, WIFI_PASS);
+    radioReiniciado = true;
+    ultimaTentativaWiFi = agora;
+    quedaTentativas++;
+    return false;
+  }
+
+  if (agora - ultimaTentativaWiFi > WIFI_TENTATIVA_MS) {
+    Serial.printf("📶 Reconectando Wi-Fi (tentativa %d)...\n", quedaTentativas + 1);
+    WiFi.disconnect();
+    WiFi.begin(WIFI_SSID, WIFI_PASS);
+    ultimaTentativaWiFi = agora;
+    quedaTentativas++;
+  }
+  return false;
+}
+
+void cuidarRelogio() {
+  if (horarioSincronizado) { walMarcarInicio(); return; }
+  if (time(nullptr) > EPOCA_MINIMA) {
+    horarioSincronizado = true;
+    walMarcarInicio();
+    Serial.printf("⏰ Horário sincronizado — UTC %ld\n", (long)time(nullptr));
+    return;
+  }
+  if (WiFi.status() == WL_CONNECTED && (ultimoPedidoNTP == 0 || millis() - ultimoPedidoNTP > 30000UL)) {
+    configTime(0, 0, "pool.ntp.org", "time.google.com", "br.pool.ntp.org");
+    ultimoPedidoNTP = millis();
+  }
+}
+
+// ==================================================
+// 🩺 SAÚDE
+// ==================================================
+void verificarSaude(unsigned long agora) {
+  unsigned long semFirebase = agora - ultimoFirebaseOk;
+
+  if (semFirebase > SEM_INTERNET_SEG * 1000UL)
+    iniciarQueda("Sem internet: Wi-Fi conectado, mas o servidor nao responde");
+
+  if (semFirebase > INTERNET_REFAZ_WIFI_SEG * 1000UL && !wifiRefeitoInternet) {
+    Serial.println("🌐 Sem internet — refazendo a conexão Wi-Fi");
+    wifiRefeitoInternet = true;
+    quedaTentativas++;
+    WiFi.disconnect();
+    delay(200);
+    WiFi.begin(WIFI_SSID, WIFI_PASS);
+    return;
+  }
+
+  if (bombaAtiva) return;
+
+  if (semFirebase > FIREBASE_SEM_SUCESSO_SEG * 1000UL)
+    reiniciarSeguro("Sem internet por mais de 5min (Firebase nao responde)");
+
+  if (!prontoParaPagamentos()) ultimoMPContato = agora;
+  else if (agora - ultimoMPContato > MP_SEM_CONTATO_SEG * 1000UL)
+    reiniciarSeguro("Mercado Pago sem contato ha mais de 15min");
+
+  static unsigned long ultimoHeap = 0;
+  static int heapRuim = 0;
+  if (agora - ultimoHeap > 20000UL) {
+    ultimoHeap = agora;
+    uint32_t livre = ESP.getFreeHeap();
+    uint32_t bloco = ESP.getMaxAllocHeap();
+    if (livre < HEAP_MIN_LIVRE || bloco < HEAP_MIN_BLOCO) {
+      heapRuim++;
+      Serial.printf("⚠️ Memória baixa (%d/%d): livre=%u bloco=%u\n", heapRuim, HEAP_CHECAGENS_SEGUIDAS, livre, bloco);
+      if (heapRuim >= HEAP_CHECAGENS_SEGUIDAS) reiniciarSeguro("Memoria baixa ou fragmentada");
+    } else heapRuim = 0;
+  }
+
+#if REINICIO_PREVENTIVO_HORAS > 0
+  if (agora > (unsigned long)REINICIO_PREVENTIVO_HORAS * 3600000UL)
+    reiniciarSeguro("Reinicio preventivo programado");
+#endif
+}
+
+void primeiraConexao() {
+  nuvemIniciada = true;
+  Firebase.RTDB.setBool(&fbdo, base() + "/status/bomba_ativa", bombaAtiva);
+  FirebaseJson c;
+  c.set("ligar_bomba", false);
+  c.set("desligar_bomba", false);
+  c.set("reativar_freio", false);
+  Firebase.RTDB.updateNode(&fbdo, base() + "/comandos", &c);
+  FirebaseJson info;
+  info.set("id", MAQUINA_ID);
+  info.set("nome", MAQUINA_NOME);
+  info.set("versao", FW_VERSAO);
+  info.set("visto_em", (int)agoraUTC());
+  Firebase.RTDB.updateNode(&fbdo, base() + "/info", &info);
+  // aparece sozinha na lista do painel master
+  FirebaseJson idx;
+  idx.set("nome", MAQUINA_NOME);
+  idx.set("versao", FW_VERSAO);
+  idx.set("visto_em", (int)agoraUTC());
+  Firebase.RTDB.updateNode(&fbdo, String("/indice/") + MAQUINA_ID, &idx);
+  Serial.println("☁️ Conectado ao Firebase");
+}
+
+// ==================================================
+// 🚀 SETUP
+// ==================================================
+void setup() {
+  Serial.begin(115200);
+  delay(300);
+  pinMode(PIN_RELE, OUTPUT);
+  digitalWrite(PIN_RELE, LOW);
+#if PIN_BIP >= 0
+  pinMode(PIN_BIP, OUTPUT);
+  digitalWrite(PIN_BIP, LOW);
+#endif
+  iniciarWatchdog();
+
+#if RFID_ATIVO
+  SPI.begin();                       // SCK 18 · MISO 19 · MOSI 23
+  leitorRFID.PCD_Init();
+  delay(50);
+  byte versao = leitorRFID.PCD_ReadRegister(MFRC522::VersionReg);
+  Serial.printf("🪪 Leitor RFID: %s (versao 0x%02X)\n",
+                (versao == 0x00 || versao == 0xFF) ? "NAO DETECTADO - confira a ligacao" : "pronto", versao);
+#endif
+
+  Serial.printf("\n=== VISION ÁGUA — firmware %s ===\n", FW_VERSAO);
+
+  prefs.begin("boot", false);
+  motivoRebootSalvo = prefs.getString("motivo", "");
+  if (motivoRebootSalvo != "") prefs.remove("motivo");
+  prefs.end();
+
+  prefs.begin("cx", false);
+  vivoAnterior = prefs.getULong("vivo", 0);
+  if (prefs.isKey("off_ini")) {
+    emQueda = true;
+    quedaInicio = (time_t)prefs.getULong("off_ini", 0);
+    quedaMotivo = prefs.getString("off_mot", "desconhecido");
+    quedaReinicios = prefs.getUShort("off_rb", 0);
+  }
+  prefs.end();
+
+  walCarregar();
+  freioCarregar();
+  if (freioAtivo) Serial.printf("🛑 Freio de estornos ATIVO — %s\n", freioMotivo.c_str());
+  for (int i = 0; i < MAX_PENDENTES; i++) pendentes[i].ativo = false;
+
+  WiFi.onEvent(aoEventoWiFi);
+  WiFi.persistent(false);
+  WiFi.setHostname((String("vision-") + MAQUINA_ID).c_str());
+  WiFi.mode(WIFI_STA);
+  WiFi.setAutoReconnect(true);
+  WiFi.setSleep(false);
+  WiFi.begin(WIFI_SSID, WIFI_PASS);
+
+  Serial.print("📶 Conectando ao Wi-Fi");
+  unsigned long t0 = millis();
+  while (WiFi.status() != WL_CONNECTED && millis() - t0 < 20000UL) { alimentarWDT(); delay(300); Serial.print("."); }
+  Serial.println(WiFi.status() == WL_CONNECTED ? " OK ✅" : " sem Wi-Fi (vai continuar tentando) ⏳");
+
+  if (WiFi.status() == WL_CONNECTED) {
+    configTime(0, 0, "pool.ntp.org", "time.google.com", "br.pool.ntp.org");
+    ultimoPedidoNTP = millis();
+    for (int i = 0; i < 20 && time(nullptr) < EPOCA_MINIMA; i++) { alimentarWDT(); delay(500); }
+    if (time(nullptr) > EPOCA_MINIMA) {
+      horarioSincronizado = true;
+      walMarcarInicio();
+      Serial.printf("⏰ Horário: UTC %ld\n", (long)time(nullptr));
+    }
+  }
+
+  fbConfig.api_key = API_KEY;
+  fbConfig.database_url = DATABASE_URL;
+  fbConfig.token_status_callback = tokenStatusCallback;
+  fbConfig.timeout.wifiReconnect    = 10 * 1000;
+  fbConfig.timeout.socketConnection = 10 * 1000;
+  fbConfig.timeout.sslHandshake     = 20 * 1000;
+  fbConfig.timeout.serverResponse   = 10 * 1000;
+  fbConfig.timeout.rtdbKeepAlive    = 45 * 1000;
+  auth.user.email = FB_EMAIL;
+  auth.user.password = FB_PASSWORD;
+  Firebase.begin(&fbConfig, &auth);
+  Firebase.reconnectWiFi(false);
+
+  ultimoFirebaseOk = millis();
+  ultimoMPContato = millis();
+  Serial.println("🔍 Aguardando PIX...\n");
+}
+
+// ==================================================
+// 🔁 LOOP
+// ==================================================
+void loop() {
+  alimentarWDT();
+  unsigned long agora = millis();
+
+  if (bombaAtiva && (long)(agora - fimBomba) >= 0) desligarBomba("fim do ciclo");
+
+  cuidarRFID();          // cartão encostado tem prioridade: responde na hora
+  cuidarRelogio();
+  if (!cuidarWiFi()) { delay(200); return; }
+
+  bool fbOk = Firebase.ready();
+  alimentarWDT();
+  verificarSaude(agora);
+  if (!fbOk) { delay(100); return; }
+  if (!nuvemIniciada) primeiraConexao();
+  freioJanelas(agoraUTC());
+  if (!operacionalDesde && prontoParaPagamentos()) {
+    operacionalDesde = agoraUTC();
+    Serial.printf("✅ Atendendo desde %s — PIX anteriores a isso nao liberam agua\n", horaBR(operacionalDesde).c_str());
+  }
+
+  static unsigned long tSync = 0;
+  if (tSync == 0 || agora - tSync > 5000UL) {
+    tSync = agora;
+    enviarHeartbeat(agora);
+    alimentarWDT();
+    lerConfig();
+    alimentarWDT();
+    gravarPendentes();
+  }
+
+  static unsigned long tCmd = 0;
+  if (agora - tCmd > 2000UL) { tCmd = agora; lerComandos(); alimentarWDT(); }
+
+  if (prontoParaPagamentos()) {
+    static unsigned long tMP = 0;
+    if (agora - tMP >= INTERVALO_CONSULTA_MS) { tMP = millis(); verificarMP(); alimentarWDT(); }
+    static unsigned long tFila = 0;
+    if (filaUrgente || agora - tFila > 5000UL) { tFila = millis(); filaUrgente = false; processarFilaEstornos(); alimentarWDT(); }
+
+    static unsigned long tCred = 0;
+    if (agora - tCred > 3000UL) {        // recargas e pedidos do aplicativo do cliente
+      tCred = millis();
+      processarRecargas();
+      alimentarWDT();
+      processarPedidos();
+      alimentarWDT();
+      processarResgates();
+      alimentarWDT();
+    }
+  }
+
+  static unsigned long tOTA = 0;
+  if (agora - tOTA > 10000UL) { tOTA = agora; verificarOTA(); alimentarWDT(); }
+
+  static unsigned long tVivo = 0;
+  if (tVivo == 0 || agora - tVivo > 60000UL) { tVivo = agora; salvarVivo(); }
+
+  static unsigned long tAguardando = 0;
+  if (agora - tAguardando > 10000UL) {
+    tAguardando = agora;
+    Serial.printf("🔍 Aguardando PIX... (R$%.2f | bomba %s | sinal %d dBm%s%s)\n",
+                  valorEsperado, bombaAtiva ? "ligada" : "parada", WiFi.RSSI(),
+                  modoSimulacao ? " | SIMULAÇÃO" : "", freioAtivo ? " | FREIO ATIVO" : "");
+  }
+
+  delay(30);
+}
+
+</script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 // ================= FIREBASE =================
 // A apiKey web é pública por natureza: quem protege os dados são as Regras
@@ -1174,6 +3355,18 @@ const motivoTx = t => t.motivo_estorno || t.motivo || LEGADO[t.origem] || (t.sta
 const precisaDecisao = t => t.status === 'aguardando_autorizacao' || t.status === 'ignorado_fora_da_janela';
 const statusInfo = t => STATUS[t.status] || { l: t.status || '—', c: '' };
 
+// ================= MÁQUINAS =================
+// Tudo desta máquina fica em /maquinas/<id>/ no Firebase. O índice /indice
+// guarda só o nome de cada uma, para a lista carregar rápido.
+let maquinaAtual = lsGet('va_maquina', '') || '';
+let maquinas = {};            // id -> { nome, criada_em }
+let statusMaquinas = {};      // id -> status (para a lista)
+let offsMaquinas = [];
+// Máquina "formato antigo" (raiz: true) grava direto na raiz do banco, como antes.
+const ehRaiz = id => (maquinas[id === undefined ? maquinaAtual : id] || {}).raiz === true;
+const P = p => ehRaiz() ? p : `/maquinas/${maquinaAtual}${p}`;
+const R = p => db.ref(P(p));
+
 // ================= ESTADO =================
 function novoEstado(){ return { status:{}, config:{}, comandos:{}, dev:{}, txRec:{}, txEsp:{}, tx:[], logsEsp:[], logsApi:[], conexao:[], ano:null, ok:{} }; }
 let S = novoEstado();
@@ -1213,19 +3406,20 @@ function iniciarDados() {
     if (v) $('#net-banner').hidden = true;
     else netTimer = setTimeout(() => { $('#net-banner').hidden = false; }, 4000);
   });
-  listen(db.ref('/status'), 'status', v => { S.status = v || {}; trackBomba(); avancarCmd(); checarAplicado(); renderStatus(); renderConexao(); renderSeguranca(); });
-  listen(db.ref('/config'), 'configurações', v => { S.config = v || {}; renderConfig(); renderRegras(); renderSeguranca(); renderStatus(); });
-  listen(db.ref('/comandos'), 'comandos', v => { S.comandos = v || {}; avancarCmd(); });
-  listen(db.ref('/developer'), 'atualização', v => { S.dev = v || {}; renderOta(); });
+  listen(R('/status'), 'status', v => { S.status = v || {}; trackBomba(); avancarCmd(); checarAplicado(); renderStatus(); renderConexao(); renderSeguranca(); });
+  listen(R('/config'), 'configurações', v => { S.config = v || {}; renderConfig(); renderRegras(); renderSeguranca(); renderStatus(); });
+  listen(R('/comandos'), 'comandos', v => { S.comandos = v || {}; avancarCmd(); });
+  listen(R('/developer'), 'atualização', v => { S.dev = v || {}; renderOta(); });
+  listen(R('/ultimo_cartao'), 'cartões', v => { S.ultimoCartao = v || null; renderUltimoCartao(); });
 
   const desde = agoraSec() - DIAS_AO_VIVO * 86400;
-  listen(db.ref('/transacoes').orderByChild('processado_em').startAt(desde), 'transações', v => { S.txRec = v || {}; juntarTx(); });
+  listen(R('/transacoes').orderByChild('processado_em').startAt(desde), 'transações', v => { S.txRec = v || {}; juntarTx(); });
   for (const st of ['aguardando_autorizacao', 'ignorado_fora_da_janela', 'estorno_pendente', 'estorno_falhou', 'estorno_simulado']) {
-    listen(db.ref('/transacoes').orderByChild('status').equalTo(st), 'estornos', v => { S.txEsp[st] = v || {}; juntarTx(); });
+    listen(R('/transacoes').orderByChild('status').equalTo(st), 'estornos', v => { S.txEsp[st] = v || {}; juntarTx(); });
   }
-  listen(db.ref('/logs/esp').limitToLast(150), 'logs da ESP', v => { S.logsEsp = ordenarLogs(v); renderLogsEsp(); renderNotificacoes(); });
-  listen(db.ref('/logs/api').limitToLast(150), 'logs da API', v => { S.logsApi = ordenarLogs(v); renderLogsApi(); });
-  listen(db.ref('/logs/conexao').limitToLast(200), 'histórico de conexão', v => { S.conexao = ordenarLogs(v); renderConexao(); renderNotificacoes(); });
+  listen(R('/logs/esp').limitToLast(150), 'logs da ESP', v => { S.logsEsp = ordenarLogs(v); renderLogsEsp(); renderNotificacoes(); });
+  listen(R('/logs/api').limitToLast(150), 'logs da API', v => { S.logsApi = ordenarLogs(v); renderLogsApi(); });
+  listen(R('/logs/conexao').limitToLast(200), 'histórico de conexão', v => { S.conexao = ordenarLogs(v); renderConexao(); renderNotificacoes(); });
 
   carregarAno();
   anoTimer = setInterval(carregarAno, 30 * 60 * 1000);
@@ -1240,7 +3434,7 @@ function pararDados() {
 async function carregarAno() {
   try {
     const ini = Math.floor(new Date(new Date().getFullYear(), 0, 1).getTime() / 1000);
-    const snap = await db.ref('/transacoes').orderByChild('processado_em').startAt(ini - 86400).once('value');
+    const snap = await R('/transacoes').orderByChild('processado_em').startAt(ini - 86400).once('value');
     let liq = 0, est = 0, n = 0;
     snap.forEach(c => {
       const v = c.val(); if (!v || typeof v !== 'object') return;
@@ -1476,6 +3670,26 @@ function renderBadges() {
     b.hidden = pend === 0;
     b.textContent = pend > 9 ? '9+' : pend;
   }
+  const cartoesAbertos = pedidosCartao.filter(p => p.status !== 'entregue' && p.status !== 'recusado').length;
+  const nb = $('#nb-cartoes');
+  if (nb) { nb.hidden = cartoesAbertos === 0; nb.textContent = cartoesAbertos > 9 ? '9+' : cartoesAbertos; }
+}
+
+// ===== Programa de cashback =====
+function renderCashbackConfig() {
+  const c = S.cashback || {};
+  const set = (el, v) => { if (el.dataset.dirty !== '1' && document.activeElement !== el) el.value = v; };
+  if (!$('#cb-ativo').dataset.busy) $('#cb-ativo').checked = c.ativo === true;
+  set($('#cb-percent'), c.percentual != null ? c.percentual : 5);
+  set($('#cb-minimo'), c.minimo_resgate != null ? c.minimo_resgate : 5);
+  textoCashback();
+}
+function textoCashback() {
+  const p = Number($('#cb-percent').value) || 0, m = Number($('#cb-minimo').value) || 0;
+  const valor = Number(S.config.valor) || 2.5;
+  const porRetirada = Math.round(valor * p) / 100;
+  $('#cb-exemplo').innerHTML = `🎁 <span>Numa retirada de <b>${brl(valor)}</b>, o cliente ganha <b>${brl(porRetirada)}</b> de volta.
+    Ele resgata quando juntar <b>${brl(m)}</b>${porRetirada > 0 ? `, ou seja, a cada <b>${Math.ceil(m / porRetirada)}</b> retiradas` : ''}.</span>`;
 }
 
 // ================= BOMBA =================
@@ -1507,8 +3721,8 @@ async function enviarComando(ligar) {
   renderBomba();
   try {
     const up = {};
-    up['/comandos/' + path] = true;
-    if (ligar) up['/comandos/ligar_bomba_por'] = auth.currentUser?.email || '';
+    up[P('/comandos/' + path)] = true;
+    if (ligar) up[P('/comandos/ligar_bomba_por')] = auth.currentUser?.email || '';
     await db.ref().update(up);
     if (cmd !== c) return;
     c.etapa = Math.max(c.etapa, 1);
@@ -1560,7 +3774,7 @@ async function cancelarComando() {
   clearTimeout(cmd.timer);
   cmd = null;
   renderBomba();
-  try { await db.ref('/comandos/' + path).set(false); toast('Comando cancelado.'); }
+  try { await R('/comandos/' + path).set(false); toast('Comando cancelado.'); }
   catch (err) { toast('Não foi possível cancelar. ' + msgErro(err), 'error'); }
 }
 
@@ -1663,14 +3877,14 @@ function textoRegras() {
 async function enfileirarEstorno(t, motivo, campos = {}) {
   const agora = agoraSec(), email = auth.currentUser?.email || '', id = t.id;
   const up = {};
-  up[`/fila_estornos/${id}`] = { motivo, tentativas: 0, proxima_tentativa: 0, criado_em: agora, autorizado_por: email };
-  up[`/transacoes/${id}/status`] = 'estorno_pendente';
-  up[`/transacoes/${id}/motivo_estorno`] = motivo;
-  up[`/transacoes/${id}/tentativas`] = 0;
-  up[`/transacoes/${id}/ultimo_erro`] = '';
-  up[`/transacoes/${id}/id`] = id;
-  if (t.valor != null) up[`/transacoes/${id}/valor`] = t.valor;
-  for (const [k, v] of Object.entries(campos)) up[`/transacoes/${id}/${k}`] = v;
+  up[P(`/fila_estornos/${id}`)] = { motivo, tentativas: 0, proxima_tentativa: 0, criado_em: agora, autorizado_por: email };
+  up[P(`/transacoes/${id}/status`)] = 'estorno_pendente';
+  up[P(`/transacoes/${id}/motivo_estorno`)] = motivo;
+  up[P(`/transacoes/${id}/tentativas`)] = 0;
+  up[P(`/transacoes/${id}/ultimo_erro`)] = '';
+  up[P(`/transacoes/${id}/id`)] = id;
+  if (t.valor != null) up[P(`/transacoes/${id}/valor`)] = t.valor;
+  for (const [k, v] of Object.entries(campos)) up[P(`/transacoes/${id}/${k}`)] = v;
   await db.ref().update(up);
 }
 
@@ -1687,7 +3901,7 @@ async function acaoTx(acao, id) {
     } else if (acao === 'recusar') {
       if (!await pedirSenha('Recusar estorno',
         `O valor de ${brl(t.valor)} fica na conta e este PIX não será devolvido. Digite sua senha para confirmar.`, 'Recusar estorno')) return;
-      await db.ref('/transacoes/' + id).update({ status: 'estorno_recusado', recusado_por: email, recusado_em: agora, id: String(id) });
+      await R('/transacoes/' + id).update({ status: 'estorno_recusado', recusado_por: email, recusado_em: agora, id: String(id) });
       toast('Estorno recusado.', 'success');
     } else if (acao === 'repetir') {
       if (!await pedirSenha('Tentar o estorno de novo',
@@ -1839,9 +4053,9 @@ function renderConfig() {
 async function salvarConfig(valores, fbEl, resumoFn) {
   fb(fbEl, 'pending', 'Enviando…');
   try {
-    await db.ref('/config').update(valores);
+    await R('/config').update(valores);
     fb(fbEl, 'ok', 'Enviado ✅');
-    const snap = await db.ref('/config').get();
+    const snap = await R('/config').get();
     await espera(700);
     fb(fbEl, 'ok', `Confirmado no Firebase: ${resumoFn(snap.val() || {})} ✅`);
     return true;
@@ -1952,7 +4166,7 @@ async function gerarRelatorio() {
   btn.disabled = true; btn.textContent = 'Gerando…';
   fb(fbEl, 'pending', 'Buscando no Firebase…');
   try {
-    const snap = await db.ref('/transacoes').orderByChild('processado_em').startAt(ini - 86400).endAt(fim + 86400).once('value');
+    const snap = await R('/transacoes').orderByChild('processado_em').startAt(ini - 86400).endAt(fim + 86400).once('value');
     const incManual = $('#rel-manual').checked;
     const grupos = [...F.rel];
     const linhas = [];
@@ -2141,8 +4355,494 @@ function exportarCSV() {
   fb(fbEl, 'ok', 'CSV baixado ✅ — no Power BI use Obter dados → Texto/CSV (separador vírgula, UTF-8).');
 }
 
+// ================= MÁQUINAS: LISTA, TROCA E CRIAÇÃO =================
+let indiceRemoto = {}, maquinaRaiz = null;
+
+// Junta o que está no índice com a máquina "formato antigo" achada sozinha na raiz
+function montarLista() {
+  const temRaizNoIndice = Object.values(indiceRemoto).some(m => m && m.raiz);
+  maquinas = { ...(maquinaRaiz && !temRaizNoIndice ? { __raiz__: maquinaRaiz } : {}), ...indiceRemoto };
+  if (!maquinaAtual || !maquinas[maquinaAtual]) {
+    const primeira = Object.keys(maquinas)[0];
+    if (primeira) { maquinaAtual = primeira; lsSet('va_maquina', primeira); pararDados(); iniciarDados(); renderTudo(); }
+  }
+  renderMaquinas();
+}
+
+function ouvirMaquinas() {
+  // Detecta sozinha a máquina antiga: se existe /status na raiz, ela aparece na lista
+  const raiz = db.ref('/status');
+  const hr = raiz.on('value', s => {
+    const v = s.val();
+    if (v && (v.ultimo_heartbeat || v.online !== undefined)) {
+      maquinaRaiz = { nome: 'Máquina principal', raiz: true, detectada: true };
+      statusMaquinas['__raiz__'] = v;
+    } else maquinaRaiz = null;
+    montarLista();
+  }, () => {});
+  offs.push(() => raiz.off('value', hr));
+
+  const ref = db.ref('/indice');
+  const h = ref.on('value', snap => {
+    indiceRemoto = snap.val() || {};
+    maquinas = { ...(maquinaRaiz ? { __raiz__: maquinaRaiz } : {}), ...indiceRemoto };
+    // acompanha o status de cada máquina para a lista
+    offsMaquinas.forEach(f => f()); offsMaquinas = [];
+    for (const id of Object.keys(indiceRemoto)) {
+      const r = db.ref(ehRaiz(id) ? '/status' : `/maquinas/${id}/status`);
+      const hh = r.on('value', s => { statusMaquinas[id] = s.val() || {}; renderMaquinas(); });
+      offsMaquinas.push(() => r.off('value', hh));
+    }
+    montarLista();
+  }, err => toast('Não foi possível ler a lista de máquinas. ' + msgErro(err), 'error'));
+  offs.push(() => ref.off('value', h));
+}
+
+function estadoMaquina(id) {
+  const s = statusMaquinas[id] || {};
+  const hb = toSec(s.ultimo_heartbeat);
+  const on = s.online === true && hb && (agoraSec() - hb) < OFFLINE_APOS_SEG;
+  return { on, hb, s };
+}
+
+function renderMaquinas() {
+  const ids = Object.keys(maquinas);
+  $('#sel-maquina').innerHTML = ids.map(id =>
+    `<option value="${esc(id)}"${id === maquinaAtual ? ' selected' : ''}>${esc(maquinas[id].nome || id)}</option>`).join('')
+    || '<option>—</option>';
+
+  $('#maq-list').innerHTML = ids.length ? ids.map(id => {
+    const e = estadoMaquina(id), m = maquinas[id];
+    return `<li class="row tx" data-maquina="${esc(id)}">
+      <span class="ic-circle ${e.on ? 'pos' : 'neg'}">${e.on ? '🟢' : '🔴'}</span>
+      <div class="row-main">
+        <div class="row-title">${esc(m.nome || id)}${id === maquinaAtual ? ' · <span style="color:var(--brand)">aberta</span>' : ''}</div>
+        <div class="row-meta">${e.on ? 'Online' : 'Offline'} · ${e.hb ? 'último sinal ' + relTime(e.hb) : 'sem sinal'}${e.s.versao ? ' · firmware ' + esc(e.s.versao) : ''}${m.raiz ? ' · formato antigo' : ''}${m.detectada ? ' (encontrada sozinha)' : ''}</div>
+      </div>
+      <div class="row-end"><span class="badge ${e.on ? 'success' : 'error'}">${e.s.bomba_ativa ? 'Bomba ligada' : (e.on ? 'Pronta' : 'Sem sinal')}</span>
+        <button class="btn btn-sm btn-ghost" data-qr="${esc(id)}">QR da máquina</button>
+        <button class="btn btn-sm btn-ghost" data-qrcad="${esc(id)}">QR de cadastro</button></div>
+    </li>`;
+  }).join('') : `<li class="empty">Nenhuma máquina cadastrada ainda. Toque em "+ Nova máquina".</li>`;
+}
+
+function trocarMaquina(id) {
+  if (!id || id === maquinaAtual) return;
+  maquinaAtual = id;
+  lsSet('va_maquina', id);
+  pararDados();
+  iniciarDados();
+  ouvirMaquinas();
+  renderTudo();
+  renderMaquinas();
+  toast(`Você está vendo: ${maquinas[id]?.nome || id}`);
+}
+
+const slug = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '')
+  .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 30);
+
+async function criarMaquina(e) {
+  e.preventDefault();
+  const fbEl = $('#fb-nova');
+  const nome = $('#n-nome').value.trim();
+  const id = slug($('#n-id').value || nome);
+  const ssid = $('#n-ssid').value.trim(), wpass = $('#n-wpass').value;
+  const token = $('#n-token').value.trim();
+  const email = $('#n-email').value.trim(), senha = $('#n-senha').value;
+  const valor = Math.round(Number(String($('#n-valor').value).replace(',', '.')) * 100) / 100;
+  const tempo = Math.round(Number($('#n-tempo').value));
+
+  if (!nome) return fb(fbEl, 'error', 'Dê um nome para a máquina.');
+  if (!id) return fb(fbEl, 'error', 'Identificador inválido. Use letras minúsculas, sem espaço.');
+  if (maquinas[id]) return fb(fbEl, 'error', `Já existe uma máquina com o identificador "${id}".`);
+  if (!ssid) return fb(fbEl, 'error', 'Informe a rede Wi-Fi do local.');
+  if (!/^APP_USR-/.test(token)) return fb(fbEl, 'error', 'O token do Mercado Pago começa com APP_USR-.');
+  if (!email || !senha) return fb(fbEl, 'error', 'Informe o e-mail e a senha que a máquina usa no Firebase.');
+  if (!isFinite(valor) || valor < 0.01) return fb(fbEl, 'error', 'Informe o valor do PIX.');
+  if (!isFinite(tempo) || tempo < 5 || tempo > 300) return fb(fbEl, 'error', 'O tempo da bomba vai de 5 a 300 segundos.');
+
+  if (!await confirmar('Criar a máquina?',
+    `${nome} (${id}) · PIX de ${brl(valor)} · ${tempo}s de água. Ela nasce em modo simulação, sem devolver dinheiro de verdade.`, 'Criar')) return;
+
+  fb(fbEl, 'pending', 'Criando no Firebase…');
+  try {
+    const agora = agoraSec();
+    const up = {};
+    up[`/indice/${id}`] = { nome, criada_em: agora, criada_por: auth.currentUser?.email || '' };
+    up[`/maquinas/${id}/config`] = {
+      ligado: true, valor, tempo_bomba_seg: tempo,
+      janela_estorno_min: 10, liberar_ate_seg: 120,
+      estorno_auto_valor_incorreto: true, estorno_auto_sistema_pausado: true,
+      liberar_apos_voltar: false, modo_simulacao: true,
+      max_estornos_hora: 3, max_estornos_dia: 10, pausa_apos_entrega_seg: 90, percentual_max_estorno: 20
+    };
+    up[`/maquinas/${id}/info`] = { id, nome, criada_em: agora };
+    await db.ref().update(up);
+
+    const firmware = ($('#tpl-firmware').textContent || '')
+      .replaceAll('__MAQUINA_ID__', id)
+      .replaceAll('__MAQUINA_NOME__', nome)
+      .replaceAll('__WIFI_SSID__', ssid)
+      .replaceAll('__WIFI_PASS__', wpass)
+      .replaceAll('__MP_TOKEN__', token)
+      .replaceAll('__API_KEY__', firebaseConfig.apiKey)
+      .replaceAll('__DATABASE_URL__', firebaseConfig.databaseURL)
+      .replaceAll('__FB_EMAIL__', email)
+      .replaceAll('__FB_PASSWORD__', senha);
+    baixar(new Blob([firmware], { type: 'text/plain;charset=utf-8' }), `${id}.ino`);
+
+    fb(fbEl, 'ok', `Máquina criada ✅ O firmware ${id}.ino foi baixado. Grave na ESP32 pelo cabo.`);
+    $('#form-nova').reset();
+    $('#n-tempo').value = 30;
+    setTimeout(() => { $('#card-nova').hidden = true; trocarMaquina(id); }, 1200);
+  } catch (err) {
+    fb(fbEl, 'error', 'Não foi possível criar. ' + msgErro(err));
+  }
+}
+
+// ================= CLIENTES E CRÉDITOS =================
+let clientes = {}, buscaCliente = '';
+
+function ouvirClientes() {
+  const ref = db.ref('/clientes');
+  const h = ref.on('value', s => { clientes = s.val() || {}; renderClientes(); },
+    err => console.warn('clientes', err));
+  offs.push(() => ref.off('value', h));
+}
+
+function renderClientes() {
+  const ids = Object.keys(clientes);
+  const total = ids.reduce((a, id) => a + (Number(clientes[id].saldo) || 0), 0);
+  $('#c-qtd').textContent = ids.length;
+  $('#c-saldo').textContent = mascara(total);
+  $('#c-ativos').textContent = ids.filter(id => (Number(clientes[id].saldo) || 0) > 0).length;
+
+  const q = buscaCliente.trim().toLowerCase();
+  const lista = ids
+    .map(id => ({ id, ...clientes[id] }))
+    .filter(c => !q || String(c.nome || '').toLowerCase().includes(q) || String(c.email || '').toLowerCase().includes(q)
+      || String(c.posto_nome || c.posto || '').toLowerCase().includes(q))
+    .sort((a, b) => (Number(b.saldo) || 0) - (Number(a.saldo) || 0));
+
+  $('#c-list').innerHTML = lista.length ? lista.map(c => {
+    const ext = Object.values(c.extrato || {}).filter(x => x && typeof x === 'object').sort((a, b) => (b.em || 0) - (a.em || 0)).slice(0, 5);
+    return `<li class="row tx" data-cli="${esc(c.id)}">
+      <span class="ic-circle primary">👤</span>
+      <div class="row-main">
+        <div class="row-title">${esc(c.nome || 'Sem nome')}</div>
+        <div class="row-meta">${esc(c.email || '')}${c.atualizado_em ? ' · movimento ' + relTime(toSec(c.atualizado_em)) : ''}</div>
+        <div class="row-meta">📍 ${esc(c.posto_nome || maquinas[c.posto]?.nome || c.posto || 'posto não informado')}${Number(c.cashback) > 0 ? ' · 🎁 ' + brl(c.cashback) : ''}</div>
+      </div>
+      <div class="row-end"><span class="row-val ${Number(c.saldo) > 0 ? 'pos' : ''}">${mascara(c.saldo)}</span></div>
+      <div class="det">
+        ${linhaDet('Cliente desde', fmtCurta(c.criado_em))}
+        ${linhaDet('Identificador', c.id)}
+        <div style="grid-column:1/-1">
+          <span>Últimos lançamentos</span>
+          ${ext.length ? ext.map(i => `<b style="display:block;font-weight:500;margin-top:4px">${Number(i.valor) > 0 ? '＋' : '−'} ${brl(Math.abs(Number(i.valor) || 0))} · ${esc(fmtCurta(i.em))} · ${esc(i.origem || '')}</b>`).join('') : '<b style="font-weight:500">nenhum</b>'}
+        </div>
+        <div class="acoes">
+          <button class="btn btn-sm btn-primary" data-credito="${esc(c.id)}">＋ Ajustar saldo</button>
+        </div>
+      </div>
+    </li>`;
+  }).join('') : `<li class="empty">${Object.keys(clientes).length ? 'Nenhum cliente com esse nome.' : 'Nenhum cliente cadastrado ainda.'}</li>`;
+}
+
+async function ajustarSaldo(uid) {
+  const c = clientes[uid];
+  if (!c) return;
+  const txt = prompt(`Ajustar o saldo de ${c.nome || uid}.\nSaldo atual: ${brl(c.saldo)}\n\nDigite o valor a somar (use menos para tirar, ex: -5):`, '10');
+  if (txt === null) return;
+  const valor = Math.round(Number(String(txt).replace(',', '.')) * 100) / 100;
+  if (!isFinite(valor) || valor === 0) return toast('Valor inválido.', 'error');
+  const novo = Math.max(0, (Number(c.saldo) || 0) + valor);
+  if (!await pedirSenha('Ajustar saldo do cliente',
+    `${c.nome || uid}: ${brl(c.saldo)} → ${brl(novo)}. Digite sua senha para confirmar.`, 'Ajustar')) return;
+  try {
+    const agora = agoraSec();
+    const up = {};
+    up[`/clientes/${uid}/saldo`] = novo;
+    up[`/clientes/${uid}/atualizado_em`] = agora;
+    up[`/clientes/${uid}/extrato/${db.ref().push().key}`] = {
+      tipo: valor > 0 ? 'recarga' : 'consumo', valor, saldo_depois: novo, em: agora,
+      origem: 'ajuste_manual', referencia: auth.currentUser?.email || ''
+    };
+    await db.ref().update(up);
+    toast('Saldo ajustado.', 'success');
+  } catch (err) { toast('Não foi possível ajustar. ' + msgErro(err), 'error'); }
+}
+
+// ================= CARTÕES RFID =================
+let cartoes = {}, buscaCartao = '';
+const SIT_CARTAO = {
+  liberado: { l:'Água liberada', c:'success', ic:'💧' },
+  sem_saldo: { l:'Sem saldo', c:'warn', ic:'⚠️' },
+  nao_cadastrado: { l:'Cartão novo', c:'attn', ic:'🆕' },
+  bloqueado: { l:'Bloqueado', c:'error', ic:'🚫' },
+  sem_internet: { l:'Máquina sem internet', c:'error', ic:'📡' },
+};
+
+function ouvirCashbackConfig() {
+  const ref = db.ref('/config_global/cashback');
+  const h = ref.on('value', s => { S.cashback = s.val() || {}; renderCashbackConfig(); }, () => {});
+  offs.push(() => ref.off('value', h));
+}
+
+function ouvirCartoes() {
+  const ref = db.ref('/cartoes');
+  const h = ref.on('value', s => { cartoes = s.val() || {}; renderCartoes(); }, err => console.warn('cartoes', err));
+  offs.push(() => ref.off('value', h));
+}
+
+function renderUltimoCartao() {
+  const u = S.status && S.ultimoCartao ? S.ultimoCartao : null;
+  $('#cartao-vazio').hidden = !!u;
+  if (!u) { $('#cartao-ultimo').innerHTML = ''; return; }
+  const sit = SIT_CARTAO[u.situacao] || { l: u.situacao || '—', c: '', ic: '🪪' };
+  const jaTem = !!cartoes[u.tag];
+  $('#cartao-ultimo').innerHTML = `<li class="row">
+    <span class="ic-circle ${sit.c === 'success' ? 'pos' : sit.c === 'error' ? 'neg' : 'warn'}">${sit.ic}</span>
+    <div class="row-main">
+      <div class="row-title mono">${esc(u.tag || '—')}</div>
+      <div class="row-meta">${esc(sit.l)}${u.detalhe ? ' · ' + esc(u.detalhe) : ''} · ${fmtCurta(u.em)}</div>
+    </div>
+    <div class="row-end">
+      ${jaTem ? `<span class="badge success">já cadastrado</span>`
+              : `<button class="btn btn-sm btn-primary" data-vincular="${esc(u.tag)}">Vincular a um cliente</button>`}
+    </div></li>`;
+}
+
+function renderCartoes() {
+  renderUltimoCartao();
+  const q = buscaCartao.trim().toLowerCase();
+  const lista = Object.entries(cartoes)
+    .map(([tag, c]) => ({ tag, ...(c || {}) }))
+    .filter(c => {
+      if (!q) return true;
+      const nome = (clientes[c.uid_cliente] || {}).nome || '';
+      return c.tag.toLowerCase().includes(q) || String(c.apelido || '').toLowerCase().includes(q) || nome.toLowerCase().includes(q);
+    })
+    .sort((a, b) => toSec(b.ultimo_uso) - toSec(a.ultimo_uso));
+
+  $('#ct-list').innerHTML = lista.length ? lista.map(c => {
+    const cli = clientes[c.uid_cliente] || {};
+    const ativo = c.ativo !== false;
+    return `<li class="row tx" data-cli-cartao="${esc(c.tag)}">
+      <span class="ic-circle ${ativo ? 'primary' : 'neg'}">🪪</span>
+      <div class="row-main">
+        <div class="row-title">${esc(c.apelido || cli.nome || 'Cartão')}</div>
+        <div class="row-meta mono">${esc(c.tag)}</div>
+        <div class="row-meta">${esc(cli.nome || 'cliente removido')} · saldo ${mascara(cli.saldo)}${c.ultimo_uso ? ' · usado ' + relTime(toSec(c.ultimo_uso)) : ' · nunca usado'}</div>
+      </div>
+      <div class="row-end"><span class="badge ${ativo ? 'success' : 'error'}">${ativo ? 'Ativo' : 'Bloqueado'}</span></div>
+      <div class="det">
+        ${linhaDet('Cadastrado em', fmtCurta(c.criado_em))}
+        ${linhaDet('Cadastrado por', c.criado_por || '')}
+        ${linhaDet('Última máquina', c.ultima_maquina || '')}
+        <div class="acoes">
+          <button class="btn btn-sm ${ativo ? 'btn-warn' : 'btn-success'}" data-bloquear="${esc(c.tag)}">${ativo ? 'Bloquear cartão' : 'Desbloquear'}</button>
+          <button class="btn btn-sm btn-ghost" data-apagar-cartao="${esc(c.tag)}">Remover</button>
+        </div>
+      </div></li>`;
+  }).join('') : `<li class="empty">Nenhum cartão cadastrado. Encoste um cartão no leitor da máquina para começar.</li>`;
+}
+
+// ===== Solicitações de cartão feitas pelos clientes =====
+let pedidosCartao = [], promos = [];
+const ETAPAS = [
+  { k:'solicitado',  t:'Solicitação recebida',     prox:'em_producao', botao:'Iniciar produção' },
+  { k:'em_producao', t:'Cartão em produção',       prox:'disponivel',  botao:'Marcar como disponível' },
+  { k:'disponivel',  t:'Disponível para retirada', prox:'entregue',    botao:'Entregar e vincular tag' },
+  { k:'entregue',    t:'Entregue e ativo',         prox:null,          botao:'' },
+];
+
+function ouvirPedidosCartao() {
+  const ref = db.ref('/pedidos_cartao');
+  const h = ref.on('value', s => {
+    pedidosCartao = Object.entries(s.val() || {}).map(([uid, p]) => ({ id: uid, uid, ...(p || {}) }))
+      .sort((a, b) => (b.solicitado_em || 0) - (a.solicitado_em || 0));
+    renderPedidosCartao();
+    renderBadges();
+  }, err => console.warn('pedidos_cartao', err));
+  offs.push(() => ref.off('value', h));
+}
+
+function renderPedidosCartao() {
+  const abertos = pedidosCartao.filter(p => p.status !== 'entregue' && p.status !== 'recusado');
+  const b = $('#ped-contador');
+  b.hidden = abertos.length === 0;
+  b.textContent = `${abertos.length} em aberto`;
+
+  $('#ped-list').innerHTML = pedidosCartao.length ? pedidosCartao.slice(0, 40).map(p => {
+    const i = ETAPAS.findIndex(e => e.k === p.status);
+    const etapa = ETAPAS[i] || { t: p.status || '—', prox: null, botao: '' };
+    const cor = p.status === 'entregue' ? 'success' : p.status === 'recusado' ? 'error' : 'attn';
+    return `<li class="row tx" data-ped="${esc(p.id)}">
+      <span class="ic-circle ${cor === 'success' ? 'pos' : cor === 'error' ? 'neg' : 'warn'}">📮</span>
+      <div class="row-main">
+        <div class="row-title">${esc(p.nome || 'Cliente')}</div>
+        <div class="row-meta">${esc(etapa.t)} · pedido ${fmtCurta(p.solicitado_em)}</div>
+      </div>
+      <div class="row-end"><span class="badge ${cor}">${esc(etapa.t.split(' ')[0])}</span></div>
+      <div class="det">
+        ${linhaDet('Telefone', p.telefone)}
+        ${linhaDet('E-mail', p.email)}
+        ${linhaDet('Endereço', p.endereco)}
+        ${linhaDet('Observação', p.observacao)}
+        ${linhaDet('Tag vinculada', p.tag)}
+        <div class="acoes">
+          ${etapa.prox ? `<button class="btn btn-sm btn-primary" data-etapa="${esc(p.id)}">${esc(etapa.botao)}</button>` : ''}
+          ${p.status !== 'entregue' ? `<button class="btn btn-sm btn-ghost" data-recusar-cartao="${esc(p.id)}">Recusar</button>` : ''}
+        </div>
+      </div></li>`;
+  }).join('') : `<li class="empty">Nenhuma solicitação por enquanto.</li>`;
+}
+
+async function avancarPedido(id) {
+  const p = pedidosCartao.find(x => x.id === id);
+  if (!p) return;
+  const i = ETAPAS.findIndex(e => e.k === p.status);
+  const etapa = ETAPAS[i];
+  if (!etapa || !etapa.prox) return;
+
+  if (etapa.prox === 'entregue') return entregarCartao(p);
+
+  let observacao = '';
+  if (etapa.prox === 'disponivel') {
+    observacao = prompt('Em qual posto o cliente retira o cartão?', 'Posto Vision - unidade principal') || '';
+  }
+  try {
+    await db.ref('/pedidos_cartao/' + id).update({
+      status: etapa.prox, atualizado_em: agoraSec(),
+      atualizado_por: auth.currentUser?.email || '',
+      ...(observacao ? { posto: observacao, observacao: 'Retirada em: ' + observacao } : {})
+    });
+    toast('Etapa atualizada. O cliente já vê no aplicativo.', 'success');
+  } catch (err) { toast('Não foi possível atualizar. ' + msgErro(err), 'error'); }
+}
+
+async function entregarCartao(p) {
+  const sugerida = (S.ultimoCartao && !cartoes[S.ultimoCartao.tag]) ? S.ultimoCartao.tag : '';
+  const tag = (prompt(`Qual a tag do cartão de ${p.nome}?\n\nDica: encoste o cartão no leitor da máquina e o número aparece aqui sozinho.`, sugerida) || '').trim().toUpperCase();
+  if (!tag) return;
+  if (cartoes[tag]) return toast('Essa tag já está vinculada a outro cliente.', 'error');
+  if (!await pedirSenha('Entregar cartão',
+    `A tag ${tag} passará a gastar o saldo de ${p.nome}. Digite sua senha para confirmar.`, 'Entregar cartão')) return;
+  try {
+    const agora = agoraSec();
+    const up = {};
+    up['/cartoes/' + tag] = { uid_cliente: p.uid, apelido: p.nome || '', ativo: true, criado_em: agora, criado_por: auth.currentUser?.email || '' };
+    up['/cartoes_por_cliente/' + p.uid] = { tag, apelido: p.nome || '', ativo: true, entregue_em: agora };
+    up['/pedidos_cartao/' + p.id + '/status'] = 'entregue';
+    up['/pedidos_cartao/' + p.id + '/tag'] = tag;
+    up['/pedidos_cartao/' + p.id + '/atualizado_em'] = agora;
+    await db.ref().update(up);
+    toast('Cartão entregue e ativo ✅', 'success');
+  } catch (err) { toast('Não foi possível vincular. ' + msgErro(err), 'error'); }
+}
+
+async function recusarPedidoCartao(id) {
+  const motivo = prompt('Motivo da recusa (o cliente vê isso):', 'Cadastro incompleto');
+  if (motivo === null) return;
+  try {
+    await db.ref('/pedidos_cartao/' + id).update({ status: 'recusado', observacao: motivo, atualizado_em: agoraSec() });
+    toast('Pedido recusado.');
+  } catch (err) { toast('Não foi possível recusar. ' + msgErro(err), 'error'); }
+}
+
+// ===== Promoções =====
+function ouvirPromocoes() {
+  const ref = db.ref('/promocoes');
+  const h = ref.on('value', s => {
+    promos = Object.entries(s.val() || {}).map(([id, p]) => ({ id, ...(p || {}) }))
+      .sort((a, b) => (b.criado_em || 0) - (a.criado_em || 0));
+    renderPromos();
+  }, err => console.warn('promocoes', err));
+  offs.push(() => ref.off('value', h));
+}
+
+function renderPromos() {
+  $('#promo-list').innerHTML = promos.length ? promos.map(p => `
+    <li class="row tx" data-promo="${esc(p.id)}">
+      <span class="ic-circle ${p.ativo === false ? '' : 'primary'}">🎉</span>
+      <div class="row-main">
+        <div class="row-title">${esc(p.titulo || '')}</div>
+        <div class="row-meta">${esc(p.texto || '')}</div>
+        <div class="row-meta">${fmtCurta(p.criado_em)}${p.criado_por ? ' · ' + esc(p.criado_por) : ''}</div>
+      </div>
+      <div class="row-end"><span class="badge ${p.ativo === false ? '' : 'success'}">${p.ativo === false ? 'Desligada' : 'No ar'}</span></div>
+      <div class="det"><div class="acoes">
+        <button class="btn btn-sm btn-ghost" data-promo-toggle="${esc(p.id)}">${p.ativo === false ? 'Ligar de novo' : 'Desligar'}</button>
+        <button class="btn btn-sm btn-ghost" data-promo-apagar="${esc(p.id)}">Apagar</button>
+      </div></div>
+    </li>`).join('') : `<li class="empty">Nenhuma promoção publicada.</li>`;
+}
+
+async function vincularCartao(tag) {
+  const ids = Object.keys(clientes);
+  if (!ids.length) return toast('Cadastre um cliente antes de vincular o cartão.', 'error');
+  const lista = ids.map((id, i) => `${i + 1}) ${clientes[id].nome || id} — ${brl(clientes[id].saldo)}`).join('\n');
+  const escolha = prompt(`Cartão ${tag}\n\nDe qual cliente é este cartão?\n\n${lista}\n\nDigite o número:`, '1');
+  if (escolha === null) return;
+  const idx = parseInt(escolha, 10) - 1;
+  if (!(idx >= 0 && idx < ids.length)) return toast('Escolha inválida.', 'error');
+  const uid = ids[idx];
+  const apelido = prompt('Um apelido para este cartão (ex: "Cartão da Maria"):', clientes[uid].nome || '') || '';
+
+  if (!await pedirSenha('Vincular cartão',
+    `O cartão ${tag} passará a gastar o saldo de ${clientes[uid].nome || uid}. Digite sua senha para confirmar.`, 'Vincular')) return;
+  try {
+    await db.ref('/cartoes/' + tag).set({
+      uid_cliente: uid, apelido, ativo: true,
+      criado_em: agoraSec(), criado_por: auth.currentUser?.email || ''
+    });
+    toast('Cartão vinculado ✅', 'success');
+  } catch (err) { toast('Não foi possível vincular. ' + msgErro(err), 'error'); }
+}
+
+async function bloquearCartao(tag) {
+  const c = cartoes[tag]; if (!c) return;
+  const ativo = c.ativo !== false;
+  if (!await pedirSenha(ativo ? 'Bloquear cartão' : 'Desbloquear cartão',
+    ativo ? `O cartão ${tag} deixa de liberar água.` : `O cartão ${tag} volta a funcionar.`, ativo ? 'Bloquear' : 'Desbloquear')) return;
+  try { await db.ref('/cartoes/' + tag).update({ ativo: !ativo }); toast(ativo ? 'Cartão bloqueado.' : 'Cartão liberado.', 'success'); }
+  catch (err) { toast('Não foi possível alterar. ' + msgErro(err), 'error'); }
+}
+
+async function apagarCartao(tag) {
+  if (!await pedirSenha('Remover cartão', `O cartão ${tag} some da lista e deixa de funcionar.`, 'Remover')) return;
+  try { await db.ref('/cartoes/' + tag).remove(); toast('Cartão removido.', 'success'); }
+  catch (err) { toast('Não foi possível remover. ' + msgErro(err), 'error'); }
+}
+
+// ===== QR Code da máquina (para o cliente escanear no local) =====
+function abrirQRMaquina(id, tipo = 'app') {
+  const chave = tipo === 'cadastro' ? 'va_url_cadastro' : 'va_url_app';
+  const padrao = tipo === 'cadastro'
+    ? 'https://visionagua.github.io/dashboard/cadastro.html'
+    : 'https://visionagua.github.io/dashboard/app.html';
+  const base = lsGet(chave, '') || prompt(`Endereço da página de ${tipo === 'cadastro' ? 'cadastro' : 'uso'} (uma vez só):`, padrao);
+  if (!base) return;
+  lsSet(chave, base);
+  const param = tipo === 'cadastro' ? 'p=' : 'm=';
+  const url = base + (base.includes('?') ? '&' : '?') + param + encodeURIComponent(id);
+  $('#dlg-t').textContent = tipo === 'cadastro' ? 'QR de cadastro deste posto' : 'QR Code da máquina';
+  $('#dlg-p').innerHTML = `<span style="display:block;margin-bottom:12px">${tipo === 'cadastro'
+      ? 'Imprima e deixe no balcão. Quem escanear cria a conta já vinculada a este posto.'
+      : 'Imprima e cole na máquina. O cliente escaneia, entra na conta e libera a água com o saldo.'}</span>
+    <span id="qr-maq" style="display:grid;place-items:center;background:#fff;padding:14px;border-radius:14px"></span>
+    <span class="mono break" style="display:block;font-size:11.5px;margin-top:10px;color:var(--ink-3)">${esc(url)}</span>`;
+  const ok = $('#dlg-ok');
+  ok.textContent = 'Fechar';
+  ok.className = 'btn btn-primary';
+  $('#dlg').showModal();
+  try { new QRCode($('#qr-maq'), { text: url, width: 220, height: 220, correctLevel: QRCode.CorrectLevel.M }); }
+  catch (e) { $('#qr-maq').textContent = 'Não foi possível gerar o QR aqui. Use o endereço abaixo.'; }
+}
+
 // ================= NAVEGAÇÃO =================
-const PAGES = { geral:'Visão Geral', bomba:'Controle da Bomba', transacoes:'Transações', estornos:'Estornos',
+const PAGES = { maquinas:'Minhas Máquinas', clientes:'Clientes e Créditos', cartoes:'Cartões RFID', promocoes:'Promoções', geral:'Visão Geral', bomba:'Controle da Bomba', transacoes:'Transações', estornos:'Estornos',
   relatorios:'Relatórios', conexao:'Conexão', logsesp:'Logs ESP', logsapi:'Logs API', config:'Configurações', ota:'Atualização OTA' };
 
 function go(page) {
@@ -2152,7 +4852,7 @@ function go(page) {
   $('#page-title').textContent = PAGES[page];
   document.title = `${PAGES[page]} · Vision Água`;
   if (location.hash.slice(1) !== page) history.replaceState(null, '', '#' + page);
-  const nasAbas = ['geral', 'transacoes', 'estornos', 'relatorios'];
+  const nasAbas = ['maquinas', 'geral', 'transacoes', 'estornos', 'relatorios'];
   $$('.tab[data-page]').forEach(t => t.classList.toggle('active', t.dataset.page === page));
   $('#tab-mais').classList.toggle('active', !nasAbas.includes(page));
   fecharMenu(); fecharNotif(); fecharSheet();
@@ -2210,6 +4910,48 @@ window.addEventListener('hashchange', () => go(location.hash.slice(1)));
 document.addEventListener('click', e => {
   const ir = e.target.closest('[data-go]');
   if (ir) { go(ir.dataset.go); return; }
+  const qrc = e.target.closest('[data-qrcad]');
+  if (qrc) { e.stopPropagation(); abrirQRMaquina(qrc.dataset.qrcad, 'cadastro'); return; }
+  const qr = e.target.closest('[data-qr]');
+  if (qr) { e.stopPropagation(); abrirQRMaquina(qr.dataset.qr); return; }
+  const cred = e.target.closest('[data-credito]');
+  if (cred) { e.stopPropagation(); ajustarSaldo(cred.dataset.credito); return; }
+  const vinc = e.target.closest('[data-vincular]');
+  if (vinc) { e.stopPropagation(); vincularCartao(vinc.dataset.vincular); return; }
+  const blo = e.target.closest('[data-bloquear]');
+  if (blo) { e.stopPropagation(); bloquearCartao(blo.dataset.bloquear); return; }
+  const apg = e.target.closest('[data-apagar-cartao]');
+  if (apg) { e.stopPropagation(); apagarCartao(apg.dataset['apagarCartao']); return; }
+  const cartao = e.target.closest('[data-cli-cartao]');
+  if (cartao) { cartao.classList.toggle('open'); return; }
+  const etapa = e.target.closest('[data-etapa]');
+  if (etapa) { e.stopPropagation(); avancarPedido(etapa.dataset.etapa); return; }
+  const rec = e.target.closest('[data-recusar-cartao]');
+  if (rec) { e.stopPropagation(); recusarPedidoCartao(rec.dataset['recusarCartao']); return; }
+  const ped = e.target.closest('[data-ped]');
+  if (ped) { ped.classList.toggle('open'); return; }
+  const pt = e.target.closest('[data-promo-toggle]');
+  if (pt) {
+    e.stopPropagation();
+    const id = pt.dataset['promoToggle'], p = promos.find(x => x.id === id);
+    db.ref('/promocoes/' + id).update({ ativo: p && p.ativo === false })
+      .then(() => toast('Promoção atualizada.')).catch(err => toast(msgErro(err), 'error'));
+    return;
+  }
+  const pa = e.target.closest('[data-promo-apagar]');
+  if (pa) {
+    e.stopPropagation();
+    const id = pa.dataset['promoApagar'];
+    confirmar('Apagar promoção?', 'Ela some do aplicativo dos clientes.', 'Apagar', true)
+      .then(ok => ok && db.ref('/promocoes/' + id).remove().then(() => toast('Promoção apagada.')));
+    return;
+  }
+  const promo = e.target.closest('[data-promo]');
+  if (promo) { promo.classList.toggle('open'); return; }
+  const maq = e.target.closest('[data-maquina]');
+  if (maq) { trocarMaquina(maq.dataset.maquina); go('geral'); return; }
+  const cli = e.target.closest('[data-cli]');
+  if (cli) { cli.classList.toggle('open'); return; }
   const acao = e.target.closest('[data-acao]');
   if (acao) { e.stopPropagation(); acaoTx(acao.dataset.acao, acao.dataset.id); return; }
   const tx = e.target.closest('.tx');
@@ -2218,6 +4960,79 @@ document.addEventListener('click', e => {
   if (log) { log.classList.toggle('open'); return; }
   if (!e.target.closest('#np') && !e.target.closest('#bell')) fecharNotif();
 });
+
+// Clientes e cartões
+$('#c-busca').addEventListener('input', e => { buscaCliente = e.target.value; renderClientes(); });
+$('#ct-busca').addEventListener('input', e => { buscaCartao = e.target.value; renderCartoes(); });
+
+// Cashback
+[$('#cb-percent'), $('#cb-minimo')].forEach(el => el.addEventListener('input', () => { el.dataset.dirty = '1'; textoCashback(); }));
+$('#cb-ativo').addEventListener('change', async e => {
+  const sw = e.target, novo = sw.checked;
+  sw.dataset.busy = '1'; sw.disabled = true;
+  try {
+    await db.ref('/config_global/cashback').update({ ativo: novo });
+    toast(novo ? 'Cashback ligado.' : 'Cashback desligado.', 'success');
+  } catch (err) { sw.checked = !novo; toast('Não foi possível salvar. ' + msgErro(err), 'error'); }
+  delete sw.dataset.busy; sw.disabled = false;
+});
+$('#form-cashback').addEventListener('submit', async e => {
+  e.preventDefault();
+  const fbEl = $('#fb-cashback');
+  const p = Number($('#cb-percent').value), m = Number($('#cb-minimo').value);
+  if (!isFinite(p) || p < 0 || p > 50) return fb(fbEl, 'error', 'A porcentagem vai de 0 a 50.');
+  if (!isFinite(m) || m < 1 || m > 500) return fb(fbEl, 'error', 'O mínimo para resgate vai de R$ 1 a R$ 500.');
+  fb(fbEl, 'pending', 'Salvando…');
+  try {
+    await db.ref('/config_global/cashback').update({ percentual: p, minimo_resgate: m, ativo: $('#cb-ativo').checked });
+    [$('#cb-percent'), $('#cb-minimo')].forEach(el => delete el.dataset.dirty);
+    fb(fbEl, 'ok', `Salvo ✅ ${p}% de volta, resgate a partir de ${brl(m)}.`);
+  } catch (err) { fb(fbEl, 'error', 'Não foi possível salvar. ' + msgErro(err)); }
+});
+
+// Promoções
+$('#form-promo').addEventListener('submit', async e => {
+  e.preventDefault();
+  const fbEl = $('#fb-promo');
+  const titulo = $('#pr-titulo').value.trim(), texto = $('#pr-texto').value.trim();
+  if (titulo.length < 4) return fb(fbEl, 'error', 'Escreva um título.');
+  if (texto.length < 8) return fb(fbEl, 'error', 'Escreva o texto da promoção.');
+  if (!await confirmar('Publicar promoção?', 'Ela aparece no aplicativo de todos os clientes e dispara o aviso de novidade.', 'Publicar')) return;
+  fb(fbEl, 'pending', 'Publicando…');
+  try {
+    await db.ref('/promocoes').push({ titulo, texto, ativo: true, criado_em: agoraSec(), criado_por: auth.currentUser?.email || '' });
+    $('#pr-titulo').value = ''; $('#pr-texto').value = '';
+    fb(fbEl, 'ok', 'Promoção publicada ✅');
+  } catch (err) { fb(fbEl, 'error', 'Não foi possível publicar. ' + msgErro(err)); }
+});
+
+// Máquinas
+$('#sel-maquina').addEventListener('change', e => trocarMaquina(e.target.value));
+$('#btn-nova').addEventListener('click', () => {
+  const c = $('#card-nova');
+  c.hidden = !c.hidden;
+  if (!c.hidden) {
+    $('#n-email').value = auth.currentUser?.email || '';
+    c.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+});
+$('#n-cancelar').addEventListener('click', () => { $('#card-nova').hidden = true; });
+$('#btn-antiga').addEventListener('click', async () => {
+  const fbEl = $('#fb-antiga');
+  const nome = prompt('Nome da máquina que já está rodando neste projeto:', 'Vision Água');
+  if (!nome) return;
+  const id = slug(nome);
+  if (maquinas[id]) return fb(fbEl, 'error', 'Já existe uma máquina com esse nome na lista.');
+  if (!await confirmar('Cadastrar máquina existente?',
+    `${nome} continua gravando na raiz do banco, do jeito que está hoje. Nada é alterado nela: ela só passa a aparecer nesta lista.`, 'Cadastrar')) return;
+  try {
+    await db.ref('/indice/' + id).set({ nome, raiz: true, criada_em: agoraSec(), criada_por: auth.currentUser?.email || '' });
+    fb(fbEl, 'ok', `${nome} cadastrada ✅`);
+  } catch (err) { fb(fbEl, 'error', 'Não foi possível cadastrar. ' + msgErro(err)); }
+});
+$('#n-nome').addEventListener('input', e => { if (!$('#n-id').dataset.dirty) $('#n-id').value = slug(e.target.value); });
+$('#n-id').addEventListener('input', e => { e.target.dataset.dirty = '1'; });
+$('#form-nova').addEventListener('submit', criarMaquina);
 
 // Notificações
 $('#bell').addEventListener('click', () => {
@@ -2370,7 +5185,7 @@ $('#btn-freio').addEventListener('click', async () => {
   if (!await pedirSenha('Reativar o estorno automático',
     'Os contadores de hoje voltam para zero e a máquina volta a devolver sozinha, dentro das regras. Digite sua senha para confirmar.', 'Reativar')) return;
   try {
-    await db.ref('/comandos').update({ reativar_freio: true, reativar_freio_por: auth.currentUser?.email || '' });
+    await R('/comandos').update({ reativar_freio: true, reativar_freio_por: auth.currentUser?.email || '' });
     toast('Freio liberado. A máquina volta ao automático em instantes.', 'success');
   } catch (err) { toast('Não foi possível liberar. ' + msgErro(err), 'error'); }
 });
@@ -2457,13 +5272,13 @@ $('#form-ota').addEventListener('submit', async e => {
   if (!await confirmar('Atualizar o firmware?', 'A máquina vai baixar a nova versão e reiniciar. A bomba fica indisponível por alguns instantes.' + aviso, 'Atualizar agora')) return;
   fb(fbEl, 'pending', 'Enviando…');
   try {
-    await db.ref('/developer').update({ firmware_url: url, status: 'aguardando', atualizar: true });
+    await R('/developer').update({ firmware_url: url, status: 'aguardando', atualizar: true });
     fb(fbEl, 'ok', 'Enviado ✅ Aguardando a máquina iniciar o download.');
     $('#ota-url').value = '';
   } catch (err) { fb(fbEl, 'error', 'Não foi possível enviar. ' + msgErro(err)); }
 });
 $('#ota-cancel').addEventListener('click', async () => {
-  try { await db.ref('/developer').update({ atualizar: false, status: 'cancelado' }); toast('Pedido de atualização cancelado.'); }
+  try { await R('/developer').update({ atualizar: false, status: 'cancelado' }); toast('Pedido de atualização cancelado.'); }
   catch (err) { toast('Não foi possível cancelar. ' + msgErro(err), 'error'); }
 });
 
@@ -2477,8 +5292,14 @@ auth.onAuthStateChanged(user => {
     $('#user-ini').textContent = (user.email || '?')[0];
     sessaoInicio = agoraSec();
     iniciarDados();
+    ouvirMaquinas();
+    ouvirClientes();
+    ouvirCartoes();
+    ouvirPedidosCartao();
+    ouvirPromocoes();
+    ouvirCashbackConfig();
     renderTudo();
-    go(location.hash.slice(1));
+    go(location.hash.slice(1) || (maquinaAtual ? 'geral' : 'maquinas'));
     if (!tickTimer) tickTimer = setInterval(tick, 1000);
   } else {
     pararDados();
