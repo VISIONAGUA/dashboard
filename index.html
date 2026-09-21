@@ -245,6 +245,31 @@
   .cash-foot{margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.26);font-size:12.5px;opacity:.95;
     display:flex;gap:18px;flex-wrap:wrap;position:relative;z-index:1}
 
+  /* ---------- hero (estilo app de banco, dentro do cartão de valores) ---------- */
+  .hero-label{font-size:12px;font-weight:650;opacity:.86;text-transform:uppercase;letter-spacing:.03em;margin-top:16px;position:relative;z-index:1}
+  .hero-value{font-size:clamp(32px,9vw,42px);font-weight:800;letter-spacing:-.02em;margin-top:4px;font-variant-numeric:tabular-nums;position:relative;z-index:1}
+  .hero-sub{font-size:12.5px;opacity:.86;margin-top:2px;position:relative;z-index:1}
+  .hero-div{height:1px;background:rgba(255,255,255,.22);margin:18px 0;position:relative;z-index:1}
+  .hero-row{display:flex;align-items:center;justify-content:space-between;gap:14px;position:relative;z-index:1}
+  .hero-row-l{font-size:12px;opacity:.82}
+  .hero-row-v{font-size:17px;font-weight:750;margin-top:2px;font-variant-numeric:tabular-nums}
+  .hero-pill{background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.32);color:#fff;font-weight:650;font-size:13px;
+    padding:9px 18px;border-radius:999px;cursor:pointer;flex:none}
+  .hero-pill:hover{background:rgba(255,255,255,.28)}
+  .hero-link{display:flex;align-items:center;justify-content:space-between;width:100%;background:rgba(0,0,0,.12);border:0;color:#fff;
+    font-weight:650;font-size:13.5px;padding:13px 15px;border-radius:14px;margin-top:16px;cursor:pointer;position:relative;z-index:1}
+  .hero-link span{opacity:.7;font-size:16px}
+
+  /* ---------- atalhos rápidos (grade de telhas) ---------- */
+  .tiles-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+  @media(min-width:768px){.tiles-grid{grid-template-columns:repeat(6,1fr)}}
+  .tile{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh-1);
+    padding:16px 6px 13px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;text-align:center}
+  .tile-ic{font-size:21px}
+  .tile-l{font-size:11.5px;font-weight:650;color:var(--ink);line-height:1.25}
+  .tile-badge{position:absolute;top:-7px;left:50%;transform:translateX(-50%);background:var(--warn-bg);color:var(--warn-ink);
+    font-size:9.5px;font-weight:800;padding:3px 8px;border-radius:999px;white-space:nowrap}
+
   /* ---------- indicadores ---------- */
   .kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
   @media(min-width:768px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}}
@@ -521,6 +546,7 @@
       <button class="nav-item" data-page="clientes"><span class="ni">👥</span>Clientes</button>
       <button class="nav-item" data-page="cartoes"><span class="ni">🪪</span>Cartões<span class="nav-badge" id="nb-cartoes" hidden>0</span></button>
       <button class="nav-item" data-page="promocoes"><span class="ni">🎉</span>Promoções</button>
+      <button class="nav-item" data-page="franqueados"><span class="ni">🧑‍🤝‍🧑</span>Franqueados</button>
       <button class="nav-item" data-page="estornos"><span class="ni">↩️</span>Estornos<span class="nav-badge" id="nb-estornos" hidden>0</span></button>
       <button class="nav-item" data-page="relatorios"><span class="ni">📊</span>Relatórios</button>
       <button class="nav-item" data-page="conexao"><span class="ni">📡</span>Conexão</button>
@@ -687,6 +713,30 @@
         </div>
       </section>
 
+      <!-- ===== FRANQUEADOS ===== -->
+      <section class="page" id="p-franqueados" hidden>
+        <div class="card">
+          <div class="card-head"><div><h2>🧑‍🤝‍🧑 Cadastrar franqueado</h2><p class="hint">Cria o login e vincula a uma máquina. O franqueado entra pelo <span class="mono">painel-franqueado.html</span> e só vê o reservatório da máquina dele.</p></div></div>
+          <form id="form-franqueado" novalidate>
+            <div class="campo-2">
+              <div class="field" style="margin:0"><label for="fr-nome">Nome do franqueado</label><input id="fr-nome" class="input" autocomplete="off"></div>
+              <div class="field" style="margin:0"><label for="fr-maquina">Máquina dele</label><select id="fr-maquina" class="input"></select></div>
+            </div>
+            <div class="campo-2 mt-s">
+              <div class="field" style="margin:0"><label for="fr-email">E-mail de login</label><input id="fr-email" class="input" type="email" autocomplete="off"></div>
+              <div class="field" style="margin:0"><label for="fr-senha">Senha</label><input id="fr-senha" class="input" autocomplete="off" placeholder="mínimo 6 caracteres"></div>
+            </div>
+            <p class="fb" id="fb-franqueado"></p>
+            <button class="btn btn-primary mt-s" type="submit">Criar acesso do franqueado</button>
+          </form>
+        </div>
+
+        <div class="card mt">
+          <div class="card-head"><div><h2>Franqueados cadastrados</h2><p class="hint">Cada um só enxerga a máquina vinculada a ele.</p></div></div>
+          <ul class="list" id="franqueados-list"><li class="empty">Carregando…</li></ul>
+        </div>
+      </section>
+
       <!-- ===== VISÃO GERAL ===== -->
       <section class="page" id="p-geral">
         <div id="offline-banner" class="banner error" hidden><span>📡</span><span><strong>Máquina offline.</strong> <span id="offline-txt"></span></span></div>
@@ -697,12 +747,30 @@
             <h2>Valores recebidos</h2>
             <button class="eye" id="btn-olho" aria-pressed="false"><span id="olho-ic">👁️</span><span id="olho-txt">Ocultar</span></button>
           </div>
-          <div class="cash-grid">
-            <div class="cash-hoje"><span class="cash-l">Hoje</span><span class="cash-v" id="cash-hoje">—</span><span class="cash-s" id="cash-hoje-s">—</span></div>
-            <div><span class="cash-l">Este mês</span><span class="cash-v" id="cash-mes">—</span><span class="cash-s" id="cash-mes-s">—</span></div>
-            <div><span class="cash-l">Este ano</span><span class="cash-v" id="cash-ano">—</span><span class="cash-s" id="cash-ano-s">—</span></div>
+          <div class="hero-label">Hoje</div>
+          <div class="hero-value num" id="cash-hoje">—</div>
+          <div class="hero-sub" id="cash-hoje-s">—</div>
+          <div class="hero-div"></div>
+          <div class="hero-row">
+            <div><div class="hero-row-l">Este mês</div><div class="hero-row-v num" id="cash-mes">—</div><div class="hero-sub" id="cash-mes-s" style="margin-top:1px"></div></div>
+            <button class="hero-pill" type="button" data-go="relatorios">Ver relatório</button>
           </div>
-          <div class="cash-foot"><span id="cash-est">Estornado no mês: —</span><span id="cash-liq">Líquido do mês: —</span></div>
+          <button class="hero-link" type="button" data-go="transacoes">Últimas transações <span>›</span></button>
+        </div>
+
+        <div class="sum-grid mt">
+          <div class="card sum"><span class="sum-l">Este ano</span><span class="sum-v" id="cash-ano">—</span><span class="sum-s" id="cash-ano-s">—</span></div>
+          <div class="card sum s-warn"><span class="sum-l">Estornado no mês</span><span class="sum-v" id="cash-est">—</span></div>
+          <div class="card sum s-ok"><span class="sum-l">Líquido do mês</span><span class="sum-v" id="cash-liq">—</span></div>
+        </div>
+
+        <div class="tiles-grid mt">
+          <button class="tile" type="button" data-go="maquinas"><span class="tile-ic">🏭</span><span class="tile-l">Máquinas</span></button>
+          <button class="tile" type="button" data-go="transacoes"><span class="tile-ic">💰</span><span class="tile-l">Transações</span></button>
+          <button class="tile" type="button" data-go="clientes"><span class="tile-ic">👥</span><span class="tile-l">Clientes</span></button>
+          <button class="tile" type="button" data-go="franqueados"><span class="tile-ic">🧑‍🤝‍🧑</span><span class="tile-l">Franqueados</span></button>
+          <button class="tile" type="button" data-go="estornos"><span class="tile-badge" id="tile-estornos-badge" hidden>0</span><span class="tile-ic">↩️</span><span class="tile-l">Estornos</span></button>
+          <button class="tile" type="button" data-go="relatorios"><span class="tile-ic">📊</span><span class="tile-l">Relatórios</span></button>
         </div>
 
         <div class="kpis mt">
@@ -1128,6 +1196,7 @@
       <button class="sheet-item" data-page="clientes"><span class="si">👥</span>Clientes e créditos</button>
       <button class="sheet-item" data-page="cartoes"><span class="si">🪪</span>Cartões e solicitações</button>
       <button class="sheet-item" data-page="promocoes"><span class="si">🎉</span>Promoções</button>
+      <button class="sheet-item" data-page="franqueados"><span class="si">🧑‍🤝‍🧑</span>Franqueados</button>
       <button class="sheet-item" data-page="conexao"><span class="si">📡</span>Conexão</button>
       <button class="sheet-item" data-page="config"><span class="si">⚙️</span>Configurações</button>
       <button class="sheet-item" data-page="logsesp"><span class="si">📝</span>Logs da máquina</button>
@@ -1199,7 +1268,7 @@
 #include <SPI.h>
 #include <MFRC522.h>      // leitor de cartão RFID (biblioteca "MFRC522" by GithubCommunity)
 
-#define FW_VERSAO "3.4.0"
+#define FW_VERSAO "3.4.1"
 
 // ================= IDENTIFICAÇÃO DESTA MÁQUINA =================
 // Tudo o que esta máquina grava fica dentro de /maquinas/<MAQUINA_ID>/ no Firebase,
@@ -2349,14 +2418,11 @@ void criarCobrancaPix(const String &recargaId) {
 
   if (status != "solicitada") { Firebase.RTDB.deleteNode(&fbdo, "/fila_recargas/" + recargaId); return; }
 
-  // O dinheiro cai na conta do Mercado Pago desta máquina. Se o cliente pediu a
-  // recarga em outra máquina, deixa para ela. Se ninguém pegar em 2 minutos
-  // (a outra pode estar offline), esta assume, para o cliente não ficar parado.
+  // O dinheiro cai na conta do Mercado Pago desta máquina. Recarga de cliente de
+  // outro posto NUNCA é processada aqui, senão o valor entraria na conta errada.
   if (maquinaPedido.length() && maquinaPedido != MAQUINA_ID) {
-    time_t agora = agoraUTC();
-    if (!criadoEm || (agora && agora - criadoEm < 120)) return;
-    Serial.printf("💳 Assumindo a recarga %s (pedida em '%s', que nao respondeu)\n",
-                  recargaId.c_str(), maquinaPedido.c_str());
+    (void)criadoEm;
+    return;
   }
 
   FirebaseJson up;
@@ -3239,6 +3305,7 @@ const brl = n => Number(n || 0).toLocaleString('pt-BR', { style: 'currency', cur
 const fmtData = ts => { const s = toSec(ts); return s ? new Date(s * 1000).toLocaleString('pt-BR', { timeZone: TZ, day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' }) : '—'; };
 const fmtCurta = ts => { const s = toSec(ts); return s ? new Date(s * 1000).toLocaleString('pt-BR', { timeZone: TZ, day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' }) : '—'; };
 const dayKey = sec => new Date(sec * 1000).toLocaleDateString('en-CA', { timeZone: TZ });
+const litros = n => Number(n || 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 }) + ' L';
 function lsGet(k, def){ try { const v = localStorage.getItem(k); return v === null ? def : v; } catch { return def; } }
 function lsSet(k, v){ try { localStorage.setItem(k, v); } catch {} }
 
@@ -3361,6 +3428,7 @@ const statusInfo = t => STATUS[t.status] || { l: t.status || '—', c: '' };
 let maquinaAtual = lsGet('va_maquina', '') || '';
 let maquinas = {};            // id -> { nome, criada_em }
 let statusMaquinas = {};      // id -> status (para a lista)
+let reservatoriosMaquinas = {}; // id -> reservatorio (só leitura, para o badge na lista)
 let offsMaquinas = [];
 // Máquina "formato antigo" (raiz: true) grava direto na raiz do banco, como antes.
 const ehRaiz = id => (maquinas[id === undefined ? maquinaAtual : id] || {}).raiz === true;
@@ -3615,8 +3683,8 @@ function renderDinheiro() {
   $('#cash-mes-s').textContent = `${mn} PIX no mês`;
   $('#cash-ano').textContent = S.ano ? mascara(S.ano.liq) : '…';
   $('#cash-ano-s').textContent = S.ano ? `${S.ano.n} PIX no ano` : 'calculando…';
-  $('#cash-est').textContent = `Estornado no mês: ${mascara(est)}`;
-  $('#cash-liq').textContent = `Líquido do mês: ${mascara(m)}`;
+  $('#cash-est').textContent = mascara(est);
+  $('#cash-liq').textContent = mascara(m);
   $('#olho-ic').textContent = ocultar ? '🙈' : '👁️';
   $('#olho-txt').textContent = ocultar ? 'Mostrar' : 'Ocultar';
   $('#btn-olho').setAttribute('aria-pressed', ocultar ? 'true' : 'false');
@@ -3666,7 +3734,8 @@ function renderResumoGeral() {
 
 function renderBadges() {
   const pend = S.tx.filter(precisaDecisao).length;
-  for (const b of [$('#nb-estornos'), $('#tb-estornos')]) {
+  for (const b of [$('#nb-estornos'), $('#tb-estornos'), $('#tile-estornos-badge')]) {
+    if (!b) continue;
     b.hidden = pend === 0;
     b.textContent = pend > 9 ? '9+' : pend;
   }
@@ -4078,6 +4147,84 @@ function checarAplicado() {
   }
 }
 
+// ================= FRANQUEADOS =================
+// Cada franqueado só enxerga o reservatório da própria máquina, pelo painel-franqueado.html.
+// A ligação uid -> máquina fica em /franqueados/<uid>, e as regras do Firebase usam esse
+// vínculo pra decidir quem pode ler/gravar em /maquinas/<id>/reservatorio.
+let franqueados = {};
+
+function ouvirFranqueados() {
+  const ref = db.ref('/franqueados');
+  const h = ref.on('value', s => { franqueados = s.val() || {}; renderFranqueados(); }, err => console.warn('franqueados', err));
+  offs.push(() => ref.off('value', h));
+}
+
+function renderFranqueados() {
+  const sel = $('#fr-maquina');
+  const ids = Object.keys(maquinas).filter(id => id !== '__raiz__');
+  sel.innerHTML = ids.length
+    ? ids.map(id => `<option value="${esc(id)}">${esc(maquinas[id].nome || id)}</option>`).join('')
+    : '<option value="">Cadastre uma máquina primeiro</option>';
+
+  const lista = Object.entries(franqueados).filter(([, f]) => f && typeof f === 'object');
+  $('#franqueados-list').innerHTML = lista.length ? lista.map(([uid, f]) => `
+    <li class="row">
+      <span class="ic-circle primary">🧑‍🤝‍🧑</span>
+      <div class="row-main">
+        <div class="row-title">${esc(f.nome || 'Sem nome')}</div>
+        <div class="row-meta">${esc(f.email || '')} · máquina: ${esc(maquinas[f.maquina]?.nome || f.maquina || '—')}</div>
+      </div>
+      <div class="row-end"><button class="btn btn-sm btn-ghost" data-remover-franqueado="${esc(uid)}">Remover acesso</button></div>
+    </li>`).join('') : `<li class="empty">Nenhum franqueado cadastrado ainda.</li>`;
+}
+
+function msgAuthCriacao(err) {
+  switch (err?.code) {
+    case 'auth/email-already-in-use': return 'Esse e-mail já tem uma conta no Firebase.';
+    case 'auth/invalid-email': return 'E-mail inválido.';
+    case 'auth/weak-password': return 'A senha precisa ter pelo menos 6 caracteres.';
+    default: return 'Não foi possível criar o acesso. ' + msgErro(err);
+  }
+}
+
+// Cria a conta de login num app Firebase secundário, só pra não derrubar a sessão do master.
+async function criarFranqueado(e) {
+  e.preventDefault();
+  const fbEl = $('#fb-franqueado');
+  const nome = $('#fr-nome').value.trim();
+  const maquina = $('#fr-maquina').value;
+  const email = $('#fr-email').value.trim();
+  const senha = $('#fr-senha').value;
+  if (!nome) return fb(fbEl, 'error', 'Informe o nome do franqueado.');
+  if (!maquina) return fb(fbEl, 'error', 'Escolha a máquina dele.');
+  if (!email || email.indexOf('@') < 0) return fb(fbEl, 'error', 'Informe um e-mail válido.');
+  if (senha.length < 6) return fb(fbEl, 'error', 'A senha precisa ter pelo menos 6 caracteres.');
+
+  fb(fbEl, 'pending', 'Criando acesso…');
+  const secApp = firebase.initializeApp(firebaseConfig, 'franqueado-' + Date.now());
+  try {
+    const cred = await secApp.auth().createUserWithEmailAndPassword(email, senha);
+    const uid = cred.user.uid;
+    await db.ref('/franqueados/' + uid).set({ nome, maquina, email, criado_em: agoraSec(), criado_por: auth.currentUser?.email || '' });
+    await secApp.auth().signOut();
+    fb(fbEl, 'ok', `Acesso criado para ${nome} ✅`);
+    $('#form-franqueado').reset();
+  } catch (err) {
+    fb(fbEl, 'error', msgAuthCriacao(err));
+  } finally {
+    try { await secApp.delete(); } catch (e) {}
+  }
+}
+
+async function removerFranqueado(uid) {
+  const f = franqueados[uid]; if (!f) return;
+  if (!await confirmar('Remover o acesso deste franqueado?',
+    `${f.nome || uid} perde o acesso ao reservatório da máquina dele. O login continua existindo no Firebase (não dá pra apagar contas pelo painel), mas sem o vínculo ele não consegue mais entrar em nada.`,
+    'Remover', true)) return;
+  try { await db.ref('/franqueados/' + uid).remove(); toast('Acesso removido.', 'success'); }
+  catch (err) { toast('Não foi possível remover. ' + msgErro(err), 'error'); }
+}
+
 // ================= OTA =================
 function otaEtapa(d) {
   const s = String(d.status || '').toLowerCase();
@@ -4392,6 +4539,10 @@ function ouvirMaquinas() {
       const r = db.ref(ehRaiz(id) ? '/status' : `/maquinas/${id}/status`);
       const hh = r.on('value', s => { statusMaquinas[id] = s.val() || {}; renderMaquinas(); });
       offsMaquinas.push(() => r.off('value', hh));
+      // Só leitura aqui: quem registra o abastecimento é o franqueado, pelo painel dele.
+      const rr = db.ref(`/maquinas/${id}/reservatorio`);
+      const hr2 = rr.on('value', s => { reservatoriosMaquinas[id] = s.val() || {}; renderMaquinas(); }, () => {});
+      offsMaquinas.push(() => rr.off('value', hr2));
     }
     montarLista();
   }, err => toast('Não foi possível ler a lista de máquinas. ' + msgErro(err), 'error'));
@@ -4413,11 +4564,15 @@ function renderMaquinas() {
 
   $('#maq-list').innerHTML = ids.length ? ids.map(id => {
     const e = estadoMaquina(id), m = maquinas[id];
+    const res = reservatoriosMaquinas[id];
+    const nivel = res ? Number(res.nivel_litros) || 0 : null;
+    const cap = res ? Number(res.capacidade_litros) || 0 : 0;
+    const resTxt = nivel == null ? '' : ` · 🛢️ ${litros(nivel)}${cap ? ` (${Math.round(nivel / cap * 100)}%)` : ''}`;
     return `<li class="row tx" data-maquina="${esc(id)}">
       <span class="ic-circle ${e.on ? 'pos' : 'neg'}">${e.on ? '🟢' : '🔴'}</span>
       <div class="row-main">
         <div class="row-title">${esc(m.nome || id)}${id === maquinaAtual ? ' · <span style="color:var(--brand)">aberta</span>' : ''}</div>
-        <div class="row-meta">${e.on ? 'Online' : 'Offline'} · ${e.hb ? 'último sinal ' + relTime(e.hb) : 'sem sinal'}${e.s.versao ? ' · firmware ' + esc(e.s.versao) : ''}${m.raiz ? ' · formato antigo' : ''}${m.detectada ? ' (encontrada sozinha)' : ''}</div>
+        <div class="row-meta">${e.on ? 'Online' : 'Offline'} · ${e.hb ? 'último sinal ' + relTime(e.hb) : 'sem sinal'}${e.s.versao ? ' · firmware ' + esc(e.s.versao) : ''}${m.raiz ? ' · formato antigo' : ''}${m.detectada ? ' (encontrada sozinha)' : ''}${resTxt}</div>
       </div>
       <div class="row-end"><span class="badge ${e.on ? 'success' : 'error'}">${e.s.bomba_ativa ? 'Bomba ligada' : (e.on ? 'Pronta' : 'Sem sinal')}</span>
         <button class="btn btn-sm btn-ghost" data-qr="${esc(id)}">QR da máquina</button>
@@ -4846,7 +5001,7 @@ function abrirQRMaquina(id, tipo = 'app') {
 }
 
 // ================= NAVEGAÇÃO =================
-const PAGES = { maquinas:'Minhas Máquinas', clientes:'Clientes e Créditos', cartoes:'Cartões RFID', promocoes:'Promoções', geral:'Visão Geral', bomba:'Controle da Bomba', transacoes:'Transações', estornos:'Estornos',
+const PAGES = { maquinas:'Minhas Máquinas', clientes:'Clientes e Créditos', cartoes:'Cartões RFID', promocoes:'Promoções', franqueados:'Franqueados', geral:'Visão Geral', bomba:'Controle da Bomba', transacoes:'Transações', estornos:'Estornos',
   relatorios:'Relatórios', conexao:'Conexão', logsesp:'Logs ESP', logsapi:'Logs API', config:'Configurações', ota:'Atualização OTA' };
 
 function go(page) {
@@ -4952,6 +5107,8 @@ document.addEventListener('click', e => {
   }
   const promo = e.target.closest('[data-promo]');
   if (promo) { promo.classList.toggle('open'); return; }
+  const remFr = e.target.closest('[data-remover-franqueado]');
+  if (remFr) { e.stopPropagation(); removerFranqueado(remFr.dataset['removerFranqueado']); return; }
   const maq = e.target.closest('[data-maquina]');
   if (maq) { trocarMaquina(maq.dataset.maquina); go('geral'); return; }
   const cli = e.target.closest('[data-cli]');
@@ -5245,6 +5402,9 @@ $('#form-tempo').addEventListener('submit', async e => {
   }
 });
 
+// Franqueados
+$('#form-franqueado').addEventListener('submit', criarFranqueado);
+
 // Relatórios
 for (let h = 0; h < 24; h++) {
   $('#rel-h1').insertAdjacentHTML('beforeend', `<option value="${h}">${String(h).padStart(2,'0')}:00</option>`);
@@ -5302,6 +5462,7 @@ auth.onAuthStateChanged(user => {
     ouvirPedidosCartao();
     ouvirPromocoes();
     ouvirCashbackConfig();
+    ouvirFranqueados();
     renderTudo();
     go(location.hash.slice(1) || (maquinaAtual ? 'geral' : 'maquinas'));
     if (!tickTimer) tickTimer = setInterval(tick, 1000);
