@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>VISION ÁGUA · Pagamento</title>
+<script src="https://cdn.jsdelivr.net/npm/countup.js@2.8.0/dist/countUp.umd.js"></script>
+<style>
+  :root {
+    --bg: #0b0f14;
+    --surface: #121821;
+    --surface-2: #1a2230;
+    --line: #232c3b;
+    --text: #f5f7fa;
+    --muted: #8a94a6;
+    --accent: #00d68f;
+    --accent-2: #00b377;
+    --accent-soft: rgba(0,214,143,.12);
+    --radius: 18px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0;
+      font-family: 'Inter', -apple-system, 'Segoe UI', sans-serif;
+      -webkit-font-smoothing: antialiased; }
+  body {
+    min-height: 100vh;
+    background: radial-gradient(1200px 600px at 80% -10%, #0f2a22 0%, var(--bg) 55%);
+    color: var(--text);
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  .card {
+    width: 100%; max-width: 440px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 28px;
+    padding: 32px 28px 28px;
+    box-shadow: 0 30px 80px rgba(0,0,0,.55);
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: .8;
+  }
+  .brand {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 28px;
+  }
+  .brand-mark {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 700; font-size: .95rem; letter-spacing: .3px;
+  }
+  .brand-dot {
+    width: 30px; height: 30px; border-radius: 9px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    display: grid; place-items: center; color: #04231a;
+    font-weight: 900; font-size: .85rem;
+  }
+  .brand-name { text-transform: uppercase; letter-spacing: .8px; font-size: .9rem; }
+  .brand-sub {
+    font-size: .68rem; color: var(--muted); letter-spacing: .8px; text-transform: uppercase;
+    font-weight: 500;
+  }
+  .secure-badge {
+    font-size: .68rem; color: var(--accent);
+    background: var(--accent-soft); border: 1px solid rgba(0,214,143,.25);
+    padding: 5px 10px; border-radius: 999px; font-weight: 600;
+  }
+
+  h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -.4px; margin-bottom: 6px; }
+  .sub { color: var(--muted); font-size: .88rem; margin-bottom: 26px; line-height: 1.4; }
+
+  .qty-row {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin-bottom: 14px;
+  }
+  .qty-info .qty-label { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; }
+  .qty-info .qty-unit { font-size: .8rem; color: var(--muted); margin-top: 2px; }
+  .qty-controls { display: flex; align-items: center; gap: 14px; }
+  .qty-btn {
+    width: 42px; height: 42px; border-radius: 12px;
+    border: 1px solid var(--line); background: var(--surface);
+    color: var(--text); font-size: 1.3rem; font-weight: 600;
+    cursor: pointer; transition: .18s; display: grid; place-items: center;
+  }
+  .qty-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  .qty-btn:disabled { opacity: .28; cursor: not-allowed; }
+  .qty-value {
+    font-size: 1.7rem; font-weight: 700; min-width: 46px; text-align: center;
+    letter-spacing: -.5px;
+  }
+
+  .total-card {
+    background: linear-gradient(135deg, #0f2a22, #122a24);
+    border: 1px solid rgba(0,214,143,.2);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    margin-bottom: 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .total-label { font-size: .72rem; color: #7fbfa8; text-transform: uppercase; letter-spacing: .7px; }
+  .total-value {
+    font-size: 2rem; font-weight: 800; color: var(--accent);
+    letter-spacing: -1px; margin-top: 4px;
+  }
+  .total-value small { font-size: 1rem; font-weight: 600; color: #7fbfa8; margin-right: 2px; }
+
+  .btn-primary {
+    width: 100%; padding: 17px; border: none; border-radius: 14px;
+    background: var(--accent); color: #04231a;
+    font-size: 1rem; font-weight: 700; letter-spacing: .2px;
+    cursor: pointer; transition: .2s;
+    box-shadow: 0 10px 30px rgba(0,214,143,.25);
+  }
+  .btn-primary:hover:not(:disabled) { background: #00e89b; transform: translateY(-1px); }
+  .btn-primary:disabled { background: #2a3444; color: var(--muted); box-shadow: none; cursor: not-allowed; }
+
+  .screen { display: none; }
+  .screen.active { display: block; animation: fadeUp .35s ease; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .qr-frame {
+    background: #fff; border-radius: 18px; padding: 14px;
+    margin: 4px auto 16px; width: fit-content;
+  }
+  #qrcode-img { width: 210px; height: 210px; display: block; }
+  .pix-copy {
+    display: flex; gap: 8px; margin-bottom: 18px;
+  }
+  .pix-copy input {
+    flex: 1; min-width: 0; padding: 13px 14px;
+    background: var(--surface-2); border: 1px solid var(--line);
+    border-radius: 12px; color: var(--muted); font-size: .72rem;
+    font-family: 'SF Mono', monospace;
+  }
+  .pix-copy button {
+    padding: 0 16px; border: 1px solid var(--line); border-radius: 12px;
+    background: var(--surface-2); color: var(--text);
+    font-size: .78rem; font-weight: 600; cursor: pointer; transition: .18s;
+    white-space: nowrap;
+  }
+  .pix-copy button:hover { border-color: var(--accent); color: var(--accent); }
+
+  .status-line {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    font-size: .84rem; color: var(--muted); padding: 14px;
+    background: var(--surface-2); border-radius: 12px;
+    border: 1px dashed var(--line);
+  }
+  .pulse-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
+    box-shadow: 0 0 0 0 rgba(0,214,143,.6);
+    animation: pulse 1.6s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(0,214,143,.6); }
+    70% { box-shadow: 0 0 0 10px rgba(0,214,143,0); }
+    100% { box-shadow: 0 0 0 0 rgba(0,214,143,0); }
+  }
+
+  .success-wrap { text-align: center; padding: 6px 0 2px; }
+  .check-ring {
+    width: 74px; height: 74px; margin: 0 auto 18px;
+    border-radius: 50%; background: var(--accent-soft);
+    border: 2px solid var(--accent);
+    display: grid; place-items: center;
+    animation: pop .5s cubic-bezier(.2,.9,.3,1.3);
+  }
+  .check-ring svg { width: 34px; height: 34px; stroke: var(--accent); stroke-width: 3.5; fill: none;
+    stroke-dasharray: 48; stroke-dashoffset: 48; animation: draw .5s .2s forwards ease-out; }
+  @keyframes pop { 0% { transform: scale(.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+
+  .success-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 4px; }
+  .success-sub { color: var(--muted); font-size: .85rem; margin-bottom: 22px; }
+
+  .counter-box {
+    background: var(--surface-2); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 22px; margin-bottom: 18px;
+  }
+  .counter-label { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .7px; }
+  #counter { font-size: 2.6rem; font-weight: 800; color: var(--accent); letter-spacing: -1.5px; margin-top: 4px; }
+  .counter-total { font-size: .78rem; color: var(--muted); margin-top: 2px; }
+
+  .progress-track { height: 6px; background: var(--surface-2); border-radius: 999px; overflow: hidden; margin-bottom: 10px; }
+  .progress-fill { height: 100%; width: 0%; border-radius: 999px;
+    background: linear-gradient(90deg, var(--accent-2), var(--accent));
+    transition: width .5s ease; }
+  .progress-note { font-size: .78rem; color: var(--muted); }
+</style>
+</head>
+<body>
+  <div class="card">
+
+    <!-- ========== TELA 1: CHECKOUT ========== -->
+    <div class="screen active" id="screenQty">
+      <div class="brand">
+        <div class="brand-mark">
+          <div class="brand-dot">V</div>
+          <div>
+            <div class="brand-name">Vision Água</div>
+            <div class="brand-sub">Checkout</div>
+          </div>
+        </div>
+        <span class="secure-badge">● Pix seguro</span>
+      </div>
+
+      <h1>Quantos garrafões?</h1>
+      <p class="sub">Selecione a quantidade e gere o Pix na hora.</p>
+
+      <div class="qty-row">
+        <div class="qty-info">
+          <div class="qty-label">Garrafão 20L</div>
+          <div class="qty-unit">R$ 2,50 / unidade</div>
+        </div>
+        <div class="qty-controls">
+          <button class="qty-btn" id="minusBtn" disabled>−</button>
+          <span class="qty-value" id="qtyValue">1</span>
+          <button class="qty-btn" id="plusBtn">+</button>
+        </div>
+      </div>
+
+      <div class="total-card">
+        <div>
+          <div class="total-label">Total a pagar</div>
+          <div class="total-value"><small>R$</small><span id="totalValue">2,50</span></div>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="payBtn">Gerar código Pix</button>
+    </div>
+
+    <!-- ========== TELA 2: QR CODE ========== -->
+    <div class="screen" id="screenQr">
+      <div class="brand">
+        <div class="brand-mark">
+          <div class="brand-dot">V</div>
+          <div>
+            <div class="brand-name">Vision Água</div>
+            <div class="brand-sub">Pagamento Pix</div>
+          </div>
+        </div>
+        <span class="secure-badge" id="qrTotalBadge">R$ 0,00</span>
+      </div>
+
+      <h1>Escaneie o QR Code</h1>
+      <p class="sub">Abra o app do seu banco e pague com Pix. A confirmação é automática.</p>
+
+      <div class="qr-frame">
+        <img id="qrcode-img" alt="QR Code Pix" />
+      </div>
+
+      <div class="pix-copy">
+        <input id="pix-code" readonly value="00020126..." />
+        <button id="copyBtn">Copiar</button>
+      </div>
+
+      <div class="status-line">
+        <span class="pulse-dot"></span>
+        Aguardando confirmação do pagamento
+      </div>
+    </div>
+
+    <!-- ========== TELA 3: SUCESSO ========== -->
+    <div class="screen" id="screenSuccess">
+      <div class="brand">
+        <div class="brand-mark">
+          <div class="brand-dot">V</div>
+          <div>
+            <div class="brand-name">Vision Água</div>
+            <div class="brand-sub">Pedido confirmado</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="success-wrap">
+        <div class="check-ring">
+          <svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6" /></svg>
+        </div>
+        <div class="success-title">Pagamento aprovado</div>
+        <div class="success-sub">Recebemos seu Pix. Já iniciamos a separação.</div>
+
+        <div class="counter-box">
+          <div class="counter-label">Garrafões preparados</div>
+          <div id="counter">0</div>
+          <div class="counter-total" id="counterTotal">de 0 unidades</div>
+        </div>
+
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="progress-note" id="progressNote">Separando seu pedido...</div>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+  const PRECO_UNIT = 2.50;
+  const API_BASE = 'http://localhost:3000';
+
+  let quantidade = 1;
+  let externalRef = null;
+  let polling = null;
+
+  const $ = id => document.getElementById(id);
+  const screenQty = $('screenQty'), screenQr = $('screenQr'), screenSuccess = $('screenSuccess');
+  const qtyValue = $('qtyValue'), totalValue = $('totalValue');
+  const minusBtn = $('minusBtn'), plusBtn = $('plusBtn'), payBtn = $('payBtn');
+  const qrImg = $('qrcode-img'), pixCode = $('pix-code'), copyBtn = $('copyBtn');
+  const qrTotalBadge = $('qrTotalBadge');
+  const counterEl = $('counter'), counterTotal = $('counterTotal');
+  const progressFill = $('progressFill'), progressNote = $('progressNote');
+
+  const fmt = v => v.toFixed(2).replace('.', ',');
+
+  function atualizarUI() {
+    qtyValue.textContent = quantidade;
+    totalValue.textContent = fmt(quantidade * PRECO_UNIT);
+    minusBtn.disabled = quantidade <= 1;
+    plusBtn.disabled = quantidade >= 50;
+  }
+  minusBtn.onclick = () => { if (quantidade > 1) { quantidade--; atualizarUI(); } };
+  plusBtn.onclick = () => { if (quantidade < 50) { quantidade++; atualizarUI(); } };
+
+  function trocarTela(nova) {
+    [screenQty, screenQr, screenSuccess].forEach(s => s.classList.remove('active'));
+    nova.classList.add('active');
+  }
+
+  payBtn.onclick = async () => {
+    payBtn.disabled = true;
+    payBtn.textContent = 'Gerando Pix...';
+    try {
+      const res = await fetch(`${API_BASE}/criar-pix`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quantidade })
+      });
+      const data = await res.json();
+
+      externalRef = data.external_reference;
+      qrImg.src = 'data:image/png;base64,' + data.qr_code_base64;
+      pixCode.value = data.qr_code;
+      qrTotalBadge.textContent = 'R$ ' + fmt(quantidade * PRECO_UNIT);
+
+      trocarTela(screenQr);
+      iniciarPolling();
+    } catch (err) {
+      alert('Erro ao gerar Pix: ' + err.message);
+      payBtn.disabled = false;
+      payBtn.textContent = 'Gerar código Pix';
+    }
+  };
+
+  copyBtn.onclick = () => {
+    pixCode.select();
+    document.execCommand('copy');
+    copyBtn.textContent = 'Copiado';
+    setTimeout(() => copyBtn.textContent = 'Copiar', 1800);
+  };
+
+  function iniciarPolling() {
+    polling = setInterval(async () => {
+      try {
+        const res = await fetch(`${API_BASE}/status-pedido/${externalRef}`);
+        const data = await res.json();
+        if (data.status === 'approved' || data.status === 'pago') {
+          clearInterval(polling);
+          mostrarSucesso();
+        }
+      } catch (_) {}
+    }, 3000);
+  }
+
+  function mostrarSucesso() {
+    trocarTela(screenSuccess);
+    counterTotal.textContent = `de ${quantidade} unidades`;
+
+    const count = new CountUp.CountUp('counter', quantidade, {
+      duration: 1.8, useEasing: true, separator: '', decimal: ''
+    });
+    if (!count.error) count.start();
+
+    setTimeout(() => { progressFill.style.width = '100%'; }, 80);
+    setTimeout(() => { progressNote.textContent = 'Tudo pronto. Seus garrafões saíram para entrega.'; }, 2000);
+  }
+
+  atualizarUI();
+</script>
+</body>
+</html>
